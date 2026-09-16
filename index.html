@@ -1,0 +1,2964 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Fitness Coach Dashboard — Giáo trình 12 tuần: Giảm mỡ · Giữ cơ · Săn chắc">
+<title>F12 · Giảm Mỡ — Giữ Cơ — Săn Chắc</title>
+<style>
+/* ============================================================
+   1. DESIGN TOKENS
+   ============================================================ */
+:root{
+  --bg:#F7F8FA; --surface:#FFFFFF; --surface2:#F1F0F7; --surface3:#EDECF4;
+  --primary:#6750E8; --primary-strong:#5A43D6; --secondary:#9B8AFB;
+  --primary-weak:#EDE9FE; --on-primary:#FFFFFF;
+  --success:#34A853; --success-weak:#E6F4EA;
+  --warning:#D98403; --warning-amber:#F5A524; --warning-weak:#FEF3E2;
+  --danger:#E5484D; --danger-weak:#FEEBEC;
+  --text:#171717; --text2:#737373; --text3:#A3A3A8; --border:#E8E8EC; --border2:#DEDEE6;
+  --shadow:0 8px 30px rgba(23,23,23,.06);
+  --shadow-lg:0 18px 50px rgba(23,23,23,.14);
+  --radius:16px; --radius-sm:12px; --radius-lg:22px;
+  --sidebar-w:264px;
+  --fig-body:#20202A; --fig-far:#C9C4E8; --fig-eq:#4B465C; --fig-eqfill:#EDE9FE;
+  --fig-ground:#DCDAE6; --fig-arrow:#6750E8;
+  --hero-a:#6750E8; --hero-b:#8E7BF0;
+  --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#121216; --surface:#1C1C23; --surface2:#24242D; --surface3:#2C2C36;
+  --primary:#8F7BF5; --primary-strong:#A18CF8; --secondary:#7A68E8;
+  --primary-weak:#2B2545; --on-primary:#FFFFFF;
+  --success:#4CC36B; --success-weak:#17301F;
+  --warning:#F5A524; --warning-amber:#F5A524; --warning-weak:#332711;
+  --danger:#F26D72; --danger-weak:#39191B;
+  --text:#F1F1F4; --text2:#9C9CA8; --text3:#6B6B76; --border:#2B2B34; --border2:#373741;
+  --shadow:0 8px 30px rgba(0,0,0,.35);
+  --shadow-lg:0 18px 50px rgba(0,0,0,.5);
+  --fig-body:#EDEBF6; --fig-far:#4A4564; --fig-eq:#B9B4D8; --fig-eqfill:#2B2545;
+  --fig-ground:#33333E; --fig-arrow:#9B8AFB;
+  --hero-a:#5A43D6; --hero-b:#7A63E8;
+}
+
+/* ============================================================
+   2. BASE / RESET
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; font-family:var(--font); background:var(--bg); color:var(--text);
+  font-size:15.5px; line-height:1.55; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0; line-height:1.25; font-weight:700; letter-spacing:-.01em}
+p{margin:0}
+ul,ol{margin:0; padding:0}
+button{font-family:inherit}
+img,svg{max-width:100%}
+::selection{background:var(--primary); color:#fff}
+:focus-visible{outline:3px solid var(--primary); outline-offset:2px; border-radius:6px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important}
+}
+
+/* ============================================================
+   3. LAYOUT
+   ============================================================ */
+#app{display:flex; min-height:100vh; min-height:100dvh}
+#sidebar{
+  width:var(--sidebar-w); flex:0 0 var(--sidebar-w); position:sticky; top:0; height:100vh; height:100dvh;
+  background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; padding:20px 14px; gap:6px; z-index:40;
+}
+#mainwrap{flex:1; min-width:0; display:flex; flex-direction:column}
+#view{flex:1; width:100%; max-width:1400px; margin:0 auto; padding:28px 30px 90px; min-width:0}
+main{min-width:0}
+
+/* ============================================================
+   4. SIDEBAR & BOTTOM NAV
+   ============================================================ */
+.brand{display:flex; align-items:center; gap:11px; padding:6px 10px 18px}
+.brand-mark{
+  width:40px; height:40px; border-radius:13px; flex:0 0 40px;
+  background:linear-gradient(135deg,var(--hero-a),var(--hero-b));
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  box-shadow:0 6px 16px rgba(103,80,232,.35);
+}
+.brand-name{font-weight:800; font-size:17px; letter-spacing:-.02em}
+.brand-sub{font-size:11px; color:var(--text2); margin-top:-2px}
+.nav-sec{font-size:11px; font-weight:700; letter-spacing:.09em; color:var(--text3); text-transform:uppercase; padding:14px 12px 6px}
+.nav-item{
+  display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+  padding:11px 12px; border-radius:12px; border:0; background:none; color:var(--text2);
+  font-size:14.5px; font-weight:600; cursor:pointer; transition:background .18s, color .18s;
+}
+.nav-item:hover{background:var(--surface2); color:var(--text)}
+.nav-item.active{background:var(--primary-weak); color:var(--primary); font-weight:700}
+.nav-item svg{flex:0 0 20px}
+.sidebar-foot{margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px}
+.week-pill{
+  margin:0 4px 8px; padding:12px 14px; border-radius:14px;
+  background:linear-gradient(135deg,var(--hero-a),var(--hero-b)); color:#fff;
+}
+.week-pill .wp-big{font-size:19px; font-weight:800; letter-spacing:-.02em}
+.week-pill .wp-small{font-size:12px; opacity:.85}
+.wp-bar{height:6px; border-radius:99px; background:rgba(255,255,255,.28); margin-top:9px; overflow:hidden}
+.wp-bar i{display:block; height:100%; border-radius:99px; background:#fff; transition:width .4s ease}
+
+#bottomnav{
+  display:none; position:fixed; left:0; right:0; bottom:0; z-index:60;
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  box-shadow:0 -6px 24px rgba(23,23,23,.07);
+}
+#bottomnav .bn-inner{display:grid; grid-template-columns:repeat(5,1fr); max-width:640px; margin:0 auto}
+.bn-btn{
+  display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 2px 6px;
+  background:none; border:0; color:var(--text2); font-size:10.5px; font-weight:600; cursor:pointer;
+  border-radius:10px; transition:color .18s;
+}
+.bn-btn.active{color:var(--primary)}
+.bn-btn svg{transition:transform .18s}
+.bn-btn.active svg{transform:translateY(-1px)}
+
+/* ============================================================
+   5. TYPOGRAPHY & HEADER
+   ============================================================ */
+.view-head{margin-bottom:22px}
+.view-head h1{font-size:26px; letter-spacing:-.02em}
+.view-head .sub{color:var(--text2); font-size:14px; margin-top:4px}
+.view-head-row{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap}
+.eyebrow{font-size:11.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--primary)}
+.muted{color:var(--text2)}
+.small{font-size:13px}
+.tiny{font-size:12px}
+
+/* ============================================================
+   6. CARDS / GRID / BADGES
+   ============================================================ */
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px}
+.card.pad-lg{padding:24px}
+.card-title{font-size:16px; font-weight:700; display:flex; align-items:center; gap:9px}
+.card-title svg{color:var(--primary)}
+.grid{display:grid; gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.stack{display:flex; flex-direction:column; gap:16px}
+.row{display:flex; align-items:center; gap:10px}
+.row-between{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.wrap{flex-wrap:wrap}
+.mt8{margin-top:8px}.mt14{margin-top:14px}.mt20{margin-top:20px}
+.section-title{font-size:18px; font-weight:800; letter-spacing:-.01em; margin:26px 0 14px; display:flex; align-items:center; gap:10px}
+.section-title:first-child{margin-top:0}
+
+.badge{display:inline-flex; align-items:center; gap:5px; padding:3.5px 10px; border-radius:99px; font-size:11.5px; font-weight:700; letter-spacing:.02em}
+.badge svg{flex:0 0 12px}
+.b-strength{background:var(--primary-weak); color:var(--primary)}
+.b-cardio{background:var(--warning-weak); color:var(--warning)}
+.b-recovery{background:var(--surface3); color:var(--text2)}
+.b-rest{background:var(--surface3); color:var(--text3)}
+.b-done{background:var(--success-weak); color:var(--success)}
+.b-info{background:var(--primary-weak); color:var(--primary)}
+.b-warn{background:var(--warning-weak); color:var(--warning)}
+.b-danger{background:var(--danger-weak); color:var(--danger)}
+
+/* ============================================================
+   7. BUTTONS / CHIPS / INPUTS
+   ============================================================ */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:44px; padding:0 18px; border-radius:13px; border:1px solid transparent;
+  font-size:14.5px; font-weight:700; cursor:pointer; text-decoration:none; color:var(--text);
+  background:var(--surface2); transition:transform .15s, box-shadow .2s, background .2s, border-color .2s, opacity .2s;
+  -webkit-tap-highlight-color:transparent; user-select:none;
+}
+.btn:active{transform:scale(.965)}
+.btn:disabled{opacity:.5; cursor:not-allowed; transform:none}
+.btn svg{flex:0 0 17px}
+.btn-primary{background:var(--primary); color:var(--on-primary); box-shadow:0 6px 18px rgba(103,80,232,.3)}
+.btn-primary:hover{background:var(--primary-strong)}
+.btn-outline{background:var(--surface); border-color:var(--border2); color:var(--text)}
+.btn-outline:hover{border-color:var(--primary); color:var(--primary)}
+.btn-ghost{background:transparent; color:var(--text2)}
+.btn-ghost:hover{background:var(--surface2); color:var(--text)}
+.btn-danger{background:var(--danger-weak); color:var(--danger)}
+.btn-danger-solid{background:var(--danger); color:#fff}
+.btn-lg{min-height:52px; font-size:15.5px; padding:0 24px; border-radius:15px}
+.btn-sm{min-height:34px; font-size:12.5px; padding:0 12px; border-radius:10px; gap:6px}
+.btn-sm svg{flex:0 0 14px}
+.btn-block{width:100%}
+.btn-success{background:var(--success); color:#fff}
+.icon-btn{
+  width:42px; height:42px; min-height:42px; padding:0; border-radius:12px; display:inline-flex;
+  align-items:center; justify-content:center; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text2); cursor:pointer; transition:all .18s; flex:0 0 42px;
+}
+.icon-btn:hover{color:var(--text); border-color:var(--border2)}
+.icon-btn:active{transform:scale(.94)}
+
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chip{
+  padding:8px 14px; border-radius:99px; border:1px solid var(--border2); background:var(--surface);
+  font-size:13px; font-weight:600; color:var(--text2); cursor:pointer; transition:all .18s; min-height:38px;
+  display:inline-flex; align-items:center;
+}
+.chip:hover{border-color:var(--primary); color:var(--primary)}
+.chip.active{background:var(--primary); border-color:var(--primary); color:#fff}
+
+label.field{display:flex; flex-direction:column; gap:6px; font-size:13px; font-weight:600; color:var(--text2)}
+.input,.select,textarea.input{
+  width:100%; min-height:46px; padding:10px 13px; border-radius:12px; border:1.5px solid var(--border2);
+  background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; transition:border-color .18s, box-shadow .18s;
+}
+.input:focus,.select:focus,textarea.input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-weak)}
+textarea.input{min-height:90px; resize:vertical; line-height:1.5}
+.select{appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:36px}
+input[type="number"].input{font-variant-numeric:tabular-nums}
+input[type="date"].input{min-height:46px}
+.search-wrap{position:relative; flex:1; min-width:200px}
+.search-wrap svg{position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--text3); pointer-events:none}
+.search-wrap .input{padding-left:40px}
+
+/* ============================================================
+   8. STATS / PROGRESS
+   ============================================================ */
+.stat-card{display:flex; gap:14px; align-items:center; padding:18px}
+.stat-icon{width:46px; height:46px; border-radius:14px; flex:0 0 46px; display:flex; align-items:center; justify-content:center; background:var(--primary-weak); color:var(--primary)}
+.stat-icon.green{background:var(--success-weak); color:var(--success)}
+.stat-icon.amber{background:var(--warning-weak); color:var(--warning)}
+.stat-icon.red{background:var(--danger-weak); color:var(--danger)}
+.stat-val{font-size:20px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.stat-label{font-size:12.5px; color:var(--text2); font-weight:600}
+.stat-sub{font-size:11.5px; color:var(--text3)}
+
+.bar{height:9px; border-radius:99px; background:var(--surface3); overflow:hidden}
+.bar > i{display:block; height:100%; border-radius:99px; background:var(--primary); transition:width .5s ease}
+.bar.green > i{background:var(--success)}
+.bar.amber > i{background:var(--warning-amber)}
+.bar.thin{height:6px}
+.ring-wrap{position:relative; display:inline-flex; align-items:center; justify-content:center}
+.ring-val{position:absolute; text-align:center; font-weight:800; letter-spacing:-.02em}
+.ring-val small{display:block; font-size:10px; color:var(--text2); font-weight:600}
+
+/* ============================================================
+   9. HERO / TODAY CARD
+   ============================================================ */
+.hero{
+  position:relative; overflow:hidden; border-radius:var(--radius-lg); padding:26px 26px 24px; color:#fff;
+  background:linear-gradient(135deg,var(--hero-a) 0%,var(--hero-b) 70%,#A99BFA 100%);
+  box-shadow:0 14px 40px rgba(103,80,232,.35);
+}
+.hero::after{content:""; position:absolute; right:-70px; top:-80px; width:260px; height:260px; border-radius:50%; background:rgba(255,255,255,.12)}
+.hero::before{content:""; position:absolute; right:30px; bottom:-110px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,.08)}
+.hero .h-eyebrow{font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; opacity:.85}
+.hero h2{font-size:25px; margin:7px 0 4px; letter-spacing:-.02em}
+.hero .h-meta{display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 18px; position:relative; z-index:1}
+.hero .h-chip{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; padding:5px 12px; border-radius:99px; background:rgba(255,255,255,.18); backdrop-filter:blur(4px)}
+.btn-white{background:#fff; color:var(--primary); box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.btn-white:hover{background:#F3F0FF}
+.hero .btn-white{position:relative; z-index:1}
+.hero.h-rest{background:linear-gradient(135deg,#3E8E5A,#4CB974)}
+.hero .h-list{margin:10px 0 16px; display:flex; flex-direction:column; gap:7px; font-size:14px; position:relative; z-index:1}
+.hero .h-list span{display:flex; gap:9px; align-items:center}
+
+/* ============================================================
+   10. WEEK CALENDAR STRIP
+   ============================================================ */
+.cal-strip{display:grid; grid-template-columns:repeat(7,1fr); gap:8px}
+.cal-day{
+  border:1.5px solid var(--border); background:var(--surface); border-radius:14px; padding:10px 4px 9px;
+  display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer; transition:all .18s; min-height:78px;
+}
+.cal-day:hover{border-color:var(--secondary); transform:translateY(-2px)}
+.cal-day .cd-dow{font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase}
+.cal-day .cd-num{font-size:16px; font-weight:800; font-variant-numeric:tabular-nums}
+.cal-day .cd-type{width:26px; height:5px; border-radius:99px; margin-top:auto}
+.t-strength{background:var(--primary)} .t-cardio{background:var(--warning-amber)} .t-recovery{background:var(--border2)} .t-rest{background:var(--border)}
+.cal-day.today{border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-weak)}
+.cal-day.done{background:var(--success-weak); border-color:transparent}
+.cal-day.done .cd-type{background:var(--success)}
+.cd-check{position:absolute}
+.cal-legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; font-size:12px; color:var(--text2)}
+.cal-legend span{display:inline-flex; align-items:center; gap:6px}
+.cal-legend i{width:10px; height:10px; border-radius:99px; display:inline-block}
+
+/* ============================================================
+   11. HABITS
+   ============================================================ */
+.habit-row{
+  display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid var(--border); cursor:pointer; user-select:none;
+}
+.habit-row:last-child{border-bottom:0}
+.habit-box{
+  width:24px; height:24px; border-radius:8px; border:2px solid var(--border2); flex:0 0 24px;
+  display:flex; align-items:center; justify-content:center; color:transparent; transition:all .18s;
+}
+.habit-row.on .habit-box,.check-row.on .habit-box{background:var(--success); border-color:var(--success); color:#fff}
+.habit-row .h-label{font-size:14px; font-weight:600; flex:1}
+.habit-row.on .h-label{color:var(--text2); text-decoration:line-through; text-decoration-color:var(--border2)}
+
+/* ============================================================
+   12. PROGRAM PAGE
+   ============================================================ */
+.phase-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.phase-card{position:relative; padding:18px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow)}
+.phase-card .pc-num{font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--primary)}
+.phase-card h3{font-size:15.5px; margin:5px 0 2px}
+.phase-card .pc-weeks{font-size:12px; color:var(--text2); font-weight:600}
+.phase-card ul{margin:10px 0 0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:5px}
+.phase-card li{font-size:12.8px; color:var(--text2); display:flex; gap:7px}
+.phase-card li::before{content:""; width:5px; height:5px; border-radius:99px; background:var(--secondary); flex:0 0 5px; margin-top:7px}
+.phase-card.current{border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-weak), var(--shadow)}
+.phase-card .pc-tag{position:absolute; top:14px; right:14px}
+
+.weeks-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+.week-card{
+  text-align:left; padding:16px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--border);
+  box-shadow:var(--shadow); cursor:pointer; transition:all .18s; display:block; width:100%;
+}
+.week-card:hover{transform:translateY(-2px); border-color:var(--secondary); box-shadow:0 12px 30px rgba(23,23,23,.1)}
+.week-card.current{border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-weak)}
+.week-card.locked{opacity:.62}
+.wc-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:9px}
+.wc-title{font-weight:800; font-size:14.5px}
+.wc-pct{font-size:12.5px; font-weight:700; color:var(--text2); font-variant-numeric:tabular-nums}
+.wc-dots{display:flex; gap:6px; margin-top:10px}
+.wc-dot{width:22px; height:22px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; background:var(--surface3); color:var(--text3)}
+.wc-dot.done{background:var(--success); color:#fff}
+.wc-dot.today{outline:2px solid var(--primary); outline-offset:1px}
+
+/* schedule list (week detail / cardio) */
+.sched-item{
+  display:flex; gap:13px; align-items:center; padding:13px 14px; border:1px solid var(--border);
+  border-radius:14px; background:var(--surface); transition:border-color .18s;
+}
+.sched-item + .sched-item{margin-top:9px}
+.sched-item.today{border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-weak)}
+.sched-icon{width:42px; height:42px; border-radius:12px; flex:0 0 42px; display:flex; align-items:center; justify-content:center}
+.si-strength{background:var(--primary-weak); color:var(--primary)}
+.si-cardio{background:var(--warning-weak); color:var(--warning)}
+.si-recovery{background:var(--surface3); color:var(--text2)}
+.si-rest{background:var(--surface3); color:var(--text3)}
+.sched-main{flex:1; min-width:0}
+.sched-title{font-weight:700; font-size:14px}
+.sched-sub{font-size:12.5px; color:var(--text2)}
+
+/* ============================================================
+   13. EXERCISE LIBRARY & DETAIL
+   ============================================================ */
+.ex-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+.ex-card{
+  text-align:left; padding:0; border-radius:var(--radius); background:var(--surface); border:1px solid var(--border);
+  box-shadow:var(--shadow); cursor:pointer; overflow:hidden; transition:all .18s; width:100%; display:flex; flex-direction:column;
+}
+.ex-card:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(23,23,23,.1); border-color:var(--secondary)}
+.ex-thumb{background:linear-gradient(160deg,var(--surface2),var(--surface)); border-bottom:1px solid var(--border); padding:6px 10px 0}
+.ex-thumb svg{width:100%; height:130px; display:block}
+.ex-card-body{padding:14px 16px 16px; display:flex; flex-direction:column; gap:6px; flex:1}
+.ex-name{font-weight:800; font-size:15px}
+.ex-meta{font-size:12.5px; color:var(--text2)}
+.ex-tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px}
+.tag{font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; background:var(--surface2); color:var(--text2)}
+
+.ex-detail{display:grid; grid-template-columns:440px 1fr; gap:22px; align-items:start}
+.ex-stage{position:sticky; top:24px}
+.fig-frame{background:linear-gradient(160deg,var(--surface2),var(--surface)); border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px; position:relative; overflow:hidden}
+.fig-frame .fig-phase{position:absolute; top:12px; left:12px; z-index:2}
+.fig-controls{display:flex; gap:8px; margin-top:12px; align-items:center}
+.fig-anim{position:relative}
+.fig-anim .fig-a,.fig-anim .fig-b{transition:opacity .75s ease}
+.fig-anim .fig-b{position:absolute; inset:14px; opacity:0; pointer-events:none}
+.fig-anim.playing .fig-a{opacity:0}
+.fig-anim.playing .fig-b{opacity:1}
+
+.tabs{display:flex; gap:4px; background:var(--surface2); padding:4px; border-radius:13px; overflow-x:auto; scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:1; min-height:40px; padding:0 14px; border:0; background:none; border-radius:10px; color:var(--text2);
+  font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; transition:all .18s;
+}
+.tab.active{background:var(--surface); color:var(--text); box-shadow:0 2px 8px rgba(23,23,23,.08)}
+.tabpanel{animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+.cue-box{
+  display:flex; gap:12px; padding:14px 16px; border-radius:14px; background:var(--primary-weak);
+  border:1px solid color-mix(in srgb, var(--primary) 22%, transparent); color:var(--text); align-items:flex-start;
+}
+.cue-box svg{flex:0 0 20px; color:var(--primary); margin-top:1px}
+.cue-box b{color:var(--primary)}
+
+.steps-list{list-style:none; display:flex; flex-direction:column; gap:0; counter-reset:st}
+.steps-list li{display:flex; gap:13px; padding:9px 0; counter-increment:st; align-items:flex-start}
+.steps-list li::before{
+  content:counter(st); flex:0 0 26px; width:26px; height:26px; border-radius:9px; background:var(--primary-weak);
+  color:var(--primary); font-size:12.5px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
+}
+.mistake-card{
+  display:flex; gap:11px; padding:13px 15px; border-radius:13px; background:var(--warning-weak);
+  border:1px solid color-mix(in srgb, var(--warning-amber) 30%, transparent); align-items:flex-start;
+}
+.mistake-card .mk-icon{flex:0 0 18px; color:var(--warning); margin-top:2px}
+.mistake-card b{color:var(--warning); font-size:13.5px}
+.mistake-card .mk-fix{font-size:13px; color:var(--text); margin-top:2px}
+.mistake-card .mk-fix b{color:var(--success)}
+.mb8{margin-bottom:8px}
+
+.check-row{display:flex; align-items:center; gap:12px; padding:11px 2px; cursor:pointer; user-select:none; border-bottom:1px dashed var(--border)}
+.check-row:last-child{border-bottom:0}
+.check-row .habit-box{flex:0 0 24px}
+.safety-card{display:flex; gap:12px; padding:15px 17px; border-radius:14px; background:var(--danger-weak); border:1px solid color-mix(in srgb, var(--danger) 25%, transparent); align-items:flex-start}
+.safety-card svg{flex:0 0 20px; color:var(--danger); margin-top:1px}
+.safety-card b{color:var(--danger)}
+
+/* ============================================================
+   14. WORKOUT MODE (OVERLAY)
+   ============================================================ */
+#wodOverlay{
+  position:fixed; inset:0; z-index:90; background:var(--bg); display:none; flex-direction:column;
+  animation:wodIn .25s ease;
+}
+#wodOverlay.open{display:flex}
+@keyframes wodIn{from{opacity:0; transform:scale(.985)} to{opacity:1; transform:none}}
+.wod-head{
+  flex:0 0 auto; background:var(--surface); border-bottom:1px solid var(--border);
+  padding:12px 18px; display:flex; align-items:center; gap:14px; padding-top:calc(12px + env(safe-area-inset-top));
+}
+.wod-timer{
+  font-variant-numeric:tabular-nums; font-weight:800; font-size:18px; letter-spacing:.01em;
+  display:inline-flex; align-items:center; gap:8px; padding:7px 14px; border-radius:12px; background:var(--surface2);
+}
+.wod-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 18px 40px}
+.wod-body-inner{max-width:760px; margin:0 auto}
+.wod-progress{height:6px; border-radius:99px; background:var(--surface3); overflow:hidden; flex:1}
+.wod-progress i{display:block; height:100%; background:var(--primary); border-radius:99px; transition:width .4s ease}
+.wod-ex-head{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+.wod-ex-title{font-size:23px; font-weight:800; letter-spacing:-.02em}
+.wod-ex-meta{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+.wod-ex-meta .tag{font-size:12px; padding:4.5px 12px}
+
+/* set logging table */
+.setgrid{display:flex; flex-direction:column; gap:8px; margin-top:14px}
+.setrow{
+  display:grid; grid-template-columns:34px 1fr 1fr 82px 56px; gap:8px; align-items:center;
+  padding:9px 10px; border-radius:14px; border:1.5px solid var(--border); background:var(--surface); transition:all .2s;
+}
+.setrow.done{border-color:color-mix(in srgb, var(--success) 45%, transparent); background:color-mix(in srgb, var(--success) 6%, var(--surface))}
+.setrow .sr-num{font-weight:800; color:var(--text2); text-align:center; font-size:14px}
+.setrow.done .sr-num{color:var(--success)}
+.setrow .input{min-height:44px; padding:8px 10px; text-align:center; font-weight:700}
+.unit-suffix{font-size:11px; color:var(--text3); font-weight:700; position:absolute; right:11px; top:50%; transform:translateY(-50%); pointer-events:none}
+.input-wrap{position:relative}
+.setrow .select{min-height:44px; padding:8px 30px 8px 8px; text-align:center; font-weight:700}
+.btn-done{
+  width:44px; height:44px; min-height:44px; padding:0; border-radius:12px; border:2px solid var(--border2);
+  background:var(--surface); color:var(--text3); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .18s;
+}
+.btn-done:hover{border-color:var(--success); color:var(--success)}
+.setrow.done .btn-done{background:var(--success); border-color:var(--success); color:#fff; animation:pop .3s ease}
+@keyframes pop{0%{transform:scale(.7)} 60%{transform:scale(1.12)} 100%{transform:scale(1)}}
+.sr-heads{display:grid; grid-template-columns:34px 1fr 1fr 82px 56px; gap:8px; padding:0 10px; font-size:10.5px; font-weight:800; letter-spacing:.08em; color:var(--text3); text-transform:uppercase}
+.lasttime{border:1px dashed var(--border2); border-radius:13px; padding:11px 14px; margin-top:14px; background:var(--surface2)}
+.lasttime .lt-title{font-size:11px; font-weight:800; letter-spacing:.09em; color:var(--text3); text-transform:uppercase; margin-bottom:5px}
+.lasttime .lt-sets{display:flex; gap:14px; flex-wrap:wrap; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums}
+.suggest{
+  display:flex; gap:11px; margin-top:12px; padding:12px 15px; border-radius:13px; font-size:13.5px; align-items:flex-start;
+  background:var(--primary-weak); border:1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+}
+.suggest svg{flex:0 0 18px; color:var(--primary); margin-top:1px}
+.suggest.warn{background:var(--warning-weak); border-color:color-mix(in srgb, var(--warning-amber) 35%, transparent)}
+.suggest.warn svg{color:var(--warning)}
+.pain-btn{margin-top:16px}
+
+/* warm-up */
+.wu-list{list-style:none; display:flex; flex-direction:column; gap:2px; margin-top:6px}
+
+/* summary */
+.sum-big{display:flex; flex-direction:column; align-items:center; text-align:center; padding:26px 10px 8px}
+.checkmark{width:86px; height:86px; border-radius:50%; background:var(--success-weak); display:flex; align-items:center; justify-content:center; color:var(--success); margin-bottom:14px; animation:pop .45s ease}
+.checkmark svg .ck-path{stroke-dasharray:36; stroke-dashoffset:36; animation:draw .5s .15s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.sum-stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:18px 0}
+.sum-stat{background:var(--surface2); border-radius:14px; padding:13px 8px; text-align:center}
+.sum-stat b{display:block; font-size:18px; font-weight:800; letter-spacing:-.02em}
+.sum-stat span{font-size:11.5px; color:var(--text2); font-weight:600}
+
+/* ============================================================
+   15. REST TIMER OVERLAY
+   ============================================================ */
+#restOverlay{
+  position:fixed; left:0; right:0; bottom:0; z-index:95; display:none; justify-content:center;
+  padding:14px; padding-bottom:calc(14px + env(safe-area-inset-bottom)); pointer-events:none;
+}
+#restOverlay.open{display:flex}
+.rest-card{
+  pointer-events:auto; width:min(420px,100%); background:var(--surface); border:1px solid var(--border);
+  border-radius:22px; box-shadow:var(--shadow-lg); padding:18px 20px; display:flex; gap:18px; align-items:center;
+  animation:restUp .3s ease;
+}
+@keyframes restUp{from{opacity:0; transform:translateY(24px)} to{opacity:1; transform:none}}
+.rest-card.pulse{animation:restPulse .55s ease 2}
+@keyframes restPulse{0%,100%{transform:scale(1)} 50%{transform:scale(1.025)}}
+.rest-ring{position:relative; width:86px; height:86px; flex:0 0 86px}
+.rest-ring svg{transform:rotate(-90deg)}
+.rest-ring .rr-bg{stroke:var(--surface3)}
+.rest-ring .rr-fg{stroke:var(--primary); transition:stroke-dashoffset .3s linear, stroke .3s}
+.rest-ring .rr-val{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:19px; font-variant-numeric:tabular-nums}
+.rest-info{flex:1; min-width:0}
+.rest-title{font-size:12px; font-weight:800; letter-spacing:.12em; color:var(--primary); text-transform:uppercase}
+.rest-msg{font-weight:700; font-size:15.5px; margin:3px 0 10px}
+.rest-msg.done{color:var(--success)}
+.rest-btns{display:flex; gap:7px; flex-wrap:wrap}
+
+/* ============================================================
+   16. MODALS & TOASTS
+   ============================================================ */
+#modalRoot{position:fixed; inset:0; z-index:100; display:none; align-items:flex-end; justify-content:center; background:rgba(15,12,30,.5); backdrop-filter:blur(3px); padding:0}
+#modalRoot.open{display:flex}
+.modal{
+  background:var(--surface); width:min(560px,100%); max-height:88dvh; overflow-y:auto; border-radius:24px 24px 0 0;
+  padding:24px; animation:sheetUp .28s ease; box-shadow:var(--shadow-lg);
+}
+@keyframes sheetUp{from{opacity:0; transform:translateY(40px)} to{opacity:1; transform:none}}
+.modal-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px}
+.modal-head h3{font-size:19px; letter-spacing:-.01em}
+@media (min-width:700px){
+  #modalRoot{align-items:center; padding:24px}
+  .modal{border-radius:24px; animation:modalIn .24s ease}
+  @keyframes modalIn{from{opacity:0; transform:scale(.96) translateY(10px)} to{opacity:1; transform:none}}
+}
+.modal-actions{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap}
+.modal-actions .btn{flex:1; min-width:130px}
+
+#toastRoot{position:fixed; left:50%; bottom:86px; transform:translateX(-50%); z-index:120; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:max-content; max-width:92vw}
+@media (min-width:900px){#toastRoot{bottom:28px}}
+.toast{
+  display:flex; align-items:center; gap:10px; background:var(--text); color:var(--bg); font-weight:600; font-size:14px;
+  padding:12px 18px; border-radius:99px; box-shadow:var(--shadow-lg); animation:toastIn .25s ease;
+}
+.toast .t-icon{color:var(--success); display:flex}
+.toast.out{opacity:0; transform:translateY(8px); transition:all .3s}
+@keyframes toastIn{from{opacity:0; transform:translateY(12px) scale(.95)} to{opacity:1; transform:none}}
+
+/* ============================================================
+   17. ONBOARDING
+   ============================================================ */
+#onboardRoot{position:fixed; inset:0; z-index:110; display:none; align-items:center; justify-content:center; background:rgba(15,12,30,.6); backdrop-filter:blur(6px); padding:18px}
+#onboardRoot.open{display:flex}
+.onb-card{background:var(--surface); border-radius:26px; width:min(480px,100%); padding:30px 28px; box-shadow:var(--shadow-lg); animation:modalIn .3s ease}
+.onb-steps{display:flex; gap:6px; justify-content:center; margin-bottom:20px}
+.onb-step-dot{width:26px; height:6px; border-radius:99px; background:var(--surface3); transition:background .2s}
+.onb-step-dot.on{background:var(--primary)}
+.onb-goal{display:flex; gap:10px; margin:16px 0 6px}
+.onb-goal .og svg{flex:0 0 auto}
+.onb-goal .og{flex:1; background:var(--primary-weak); border-radius:14px; padding:14px 10px; text-align:center; color:var(--primary); font-weight:700; font-size:13.5px; display:flex; flex-direction:column; align-items:center; gap:7px}
+
+/* ============================================================
+   18. PROGRESS / CHARTS
+   ============================================================ */
+.chart-card canvas{width:100%; height:230px; display:block}
+.entry-row{display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap}
+.entry-row label.field{flex:1; min-width:120px}
+.hist-list{display:flex; flex-direction:column; max-height:260px; overflow-y:auto}
+.hist-item{display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px dashed var(--border); font-size:13.5px}
+.hist-item:last-child{border-bottom:0}
+.hist-item b{font-variant-numeric:tabular-nums}
+.hist-item .hi-x{color:var(--text3); background:none; border:0; cursor:pointer; padding:0 4px; font-size:15px; line-height:1}
+.hist-item .hi-x:hover{color:var(--danger)}
+.adh-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px dashed var(--border)}
+.adh-row:last-child{border-bottom:0}
+.adh-week{font-weight:700; width:86px; font-size:13.5px; flex:0 0 86px}
+.adh-bar{flex:1}
+.adh-val{font-weight:800; font-size:13px; width:44px; text-align:right; font-variant-numeric:tabular-nums; flex:0 0 44px}
+
+/* ============================================================
+   19. NUTRITION
+   ============================================================ */
+.meal-card{border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; background:var(--surface)}
+.meal-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px}
+.meal-head .m-name{font-weight:800; font-size:14.5px; display:flex; align-items:center; gap:9px}
+.meal-head .m-name .mi{width:34px; height:34px; border-radius:11px; background:var(--primary-weak); color:var(--primary); display:flex; align-items:center; justify-content:center}
+.meal-items{list-style:none; display:flex; flex-direction:column; gap:4px}
+.meal-items li{font-size:13.5px; color:var(--text2); display:flex; gap:8px; align-items:baseline}
+.meal-items li::before{content:""; width:5px; height:5px; border-radius:99px; background:var(--secondary); flex:0 0 5px; position:relative; top:-2px}
+.food-col h4{font-size:13.5px; margin-bottom:8px; display:flex; align-items:center; gap:7px}
+.food-col ul{list-style:none; display:flex; flex-wrap:wrap; gap:6px}
+.food-col li{font-size:12.5px; background:var(--surface2); border-radius:99px; padding:5px 11px; color:var(--text2); font-weight:600}
+.note-card{background:var(--warning-weak); border:1px solid color-mix(in srgb, var(--warning-amber) 30%, transparent); border-radius:14px; padding:14px 16px; font-size:13.5px; display:flex; gap:11px; align-items:flex-start}
+.note-card svg{flex:0 0 18px; color:var(--warning); margin-top:2px}
+
+/* ============================================================
+   20. SETTING ROWS / EMPTY STATES / MISC
+   ============================================================ */
+.set-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 2px; border-bottom:1px solid var(--border)}
+.set-row:last-child{border-bottom:0}
+.set-row .s-main{flex:1; min-width:0}
+.set-row .s-title{font-weight:700; font-size:14.5px}
+.set-row .s-desc{font-size:12.5px; color:var(--text2); margin-top:1px}
+.seg{display:inline-flex; background:var(--surface2); border-radius:12px; padding:3px; gap:2px}
+.seg button{border:0; background:none; padding:7px 13px; border-radius:9px; font-size:13px; font-weight:700; color:var(--text2); cursor:pointer; display:inline-flex; align-items:center; gap:6px; min-height:34px}
+.seg button.active{background:var(--surface); color:var(--text); box-shadow:0 2px 8px rgba(23,23,23,.1)}
+.switch{position:relative; width:48px; height:28px; flex:0 0 48px; border-radius:99px; background:var(--surface3); border:0; cursor:pointer; transition:background .2s}
+.switch::after{content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.2); transition:left .2s}
+.switch.on{background:var(--success)}
+.switch.on::after{left:23px}
+
+.empty{
+  text-align:center; padding:38px 20px; border:1.5px dashed var(--border2); border-radius:var(--radius-lg);
+  display:flex; flex-direction:column; align-items:center; gap:10px; background:var(--surface);
+}
+.empty .e-icon{width:52px; height:52px; border-radius:16px; background:var(--primary-weak); color:var(--primary); display:flex; align-items:center; justify-content:center}
+.empty p{color:var(--text2); font-size:14px; max-width:340px}
+.empty b{color:var(--text)}
+
+.glossary{border-left:3px solid var(--secondary); background:var(--surface2); padding:10px 14px; border-radius:0 12px 12px 0; font-size:13px; color:var(--text2)}
+.glossary b{color:var(--text)}
+
+.feel-row{display:flex; gap:8px; flex-wrap:wrap}
+.feel-row .chip.active{background:var(--primary)}
+
+.svgfig{width:100%; height:auto; display:block}
+.svgfig .body{stroke:var(--fig-body); stroke-width:5; fill:none; stroke-linecap:round; stroke-linejoin:round}
+.svgfig .far{stroke:var(--fig-far); stroke-width:4.5; fill:none; stroke-linecap:round; stroke-linejoin:round}
+.svgfig .head{fill:var(--surface); stroke:var(--fig-body); stroke-width:4}
+.svgfig .g{stroke:var(--fig-ground); stroke-width:2.5; stroke-linecap:round}
+.svgfig .eq{stroke:var(--fig-eq); stroke-width:2.2; fill:var(--fig-eqfill)}
+.svgfig .eqline{stroke:var(--fig-eq); stroke-width:3; stroke-linecap:round; fill:none}
+.svgfig .cable{stroke:var(--fig-eq); stroke-width:1.6; fill:none; opacity:.8}
+.svgfig .arrow{stroke:var(--fig-arrow); stroke-width:3; fill:none; stroke-linecap:round; marker-end:url(#arw)}
+.svgfig .guide{stroke:var(--fig-arrow); stroke-width:1.5; stroke-dasharray:5 4; fill:none; opacity:.5; stroke-linecap:round}
+.svgfig .lbl{font:700 10px var(--font); fill:var(--fig-arrow); letter-spacing:.02em}
+.svgfig .note{font:600 10.5px var(--font); fill:var(--text2)}
+
+.link{background:none; border:0; color:var(--primary); font-weight:700; cursor:pointer; font-size:inherit; padding:0; font-family:inherit; text-decoration:underline; text-underline-offset:3px}
+
+/* ============================================================
+   21. RESPONSIVE
+   ============================================================ */
+@media (max-width:1080px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .phase-grid{grid-template-columns:repeat(2,1fr)}
+  .ex-detail{grid-template-columns:1fr}
+  .ex-stage{position:static}
+  .ex-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:900px){
+  #sidebar{display:none}
+  #bottomnav{display:block}
+  #view{padding:20px 16px 100px}
+  .view-head h1{font-size:22px}
+  .g3,.weeks-grid{grid-template-columns:1fr 1fr}
+  .hero{padding:22px 20px}
+  .hero h2{font-size:21px}
+}
+@media (max-width:640px){
+  .g2,.g3,.g4,.weeks-grid{grid-template-columns:1fr}
+  .phase-grid{grid-template-columns:1fr}
+  .ex-grid{grid-template-columns:1fr}
+  .sum-stats{grid-template-columns:repeat(2,1fr)}
+  .cal-strip{gap:5px}
+  .cal-day{min-height:70px; padding:8px 2px}
+  .setrow,.sr-heads{grid-template-columns:26px 1fr 1fr 64px 50px; gap:6px}
+  .stat-card{padding:15px}
+  .stat-val{font-size:17px}
+  .modal{padding:20px 18px}
+  .wod-head{padding:10px 12px; gap:8px; flex-wrap:wrap}
+  .wod-timer{font-size:15.5px; padding:6px 10px}
+  .rest-card{flex-direction:column; text-align:center; gap:12px; padding:18px}
+  .rest-btns{justify-content:center}
+}
+@media (max-width:380px){
+  .cal-day .cd-type{width:20px}
+  .setrow .input{padding:8px 6px}
+}
+
+/* ============================================================
+   22. PRINT
+   ============================================================ */
+@media print{
+  body{background:#fff; color:#000; font-size:12px}
+  #sidebar,#bottomnav,#restOverlay,#modalRoot,#toastRoot,#onboardRoot,#wodOverlay,.btn,.icon-btn,.chips,.fig-controls{display:none!important}
+  #view{padding:0; max-width:100%}
+  .card{box-shadow:none; border:1px solid #ccc; break-inside:avoid}
+  .hero{background:#fff!important; color:#000; border:1px solid #ccc; box-shadow:none}
+  .hero .h-chip{background:#eee; color:#000}
+  .btn-white{display:none!important}
+  a{text-decoration:none; color:#000}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="arw" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--fig-arrow)"/>
+    </marker>
+  </defs>
+</svg>
+
+<div id="app">
+  <aside id="sidebar" aria-label="Điều hướng chính">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <div class="brand-name">F12 Coaching</div>
+        <div class="brand-sub">Giảm mỡ · Giữ cơ · Săn chắc</div>
+      </div>
+    </div>
+    <div class="week-pill" id="sideWeekPill"></div>
+    <div class="nav-sec">Menu</div>
+    <nav id="sideNav" aria-label="Mục"></nav>
+    <div class="sidebar-foot">
+      <button class="nav-item" data-action="nav" data-view="settings" id="sideSettings"><span class="ni-ic" aria-hidden="true"></span>Cài đặt</button>
+    </div>
+  </aside>
+
+  <div id="mainwrap">
+    <main id="view" tabindex="-1"></main>
+  </div>
+
+  <nav id="bottomnav" aria-label="Điều hướng dưới">
+    <div class="bn-inner" id="bnInner"></div>
+  </nav>
+</div>
+
+<!-- Workout mode overlay -->
+<div id="wodOverlay" role="dialog" aria-modal="true" aria-label="Buổi tập đang thực hiện"></div>
+<!-- Rest timer -->
+<div id="restOverlay" aria-live="polite"></div>
+<!-- Modals -->
+<div id="modalRoot"></div>
+<!-- Toasts -->
+<div id="toastRoot" aria-live="polite"></div>
+<!-- Onboarding -->
+<div id="onboardRoot" role="dialog" aria-modal="true" aria-label="Chào mừng"></div>
+
+<noscript><div style="padding:40px;text-align:center;font-family:sans-serif">Ứng dụng cần JavaScript để hoạt động. Vui lòng bật JavaScript trong trình duyệt.</div></noscript>
+
+<script>
+"use strict";
+/* ============================================================
+   F12 COACHING — Fitness Web App (single-file)
+   Data model & content theo giáo trình PDF 12 tuần.
+   Sections: ICONS · SVG FIGURES · DATA · STATE · ROUTER · UI
+   ============================================================ */
+
+/* ============================================================
+   1. ICON SYSTEM (inline SVG, stroke 1.8–2)
+   ============================================================ */
+const Icon = (() => {
+  const paths = {
+    home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/>',
+    calendar:'<rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/>',
+    dumbbell:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+    nutrition:'<path d="M12 8c-4 0-6.5 2.6-6.5 6.2C5.5 18.6 8.5 22 12 22s6.5-3.4 6.5-7.8C18.5 10.6 16 8 12 8Z"/><path d="M12 8C12 5 13.8 2.6 17 2c.2 3.3-1.6 5.6-5 6Z"/>',
+    chart:'<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/>',
+    settings:'<circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/>',
+    timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/>',
+    check:'<path d="M4.5 12.5 10 18 19.5 6.5"/>',
+    chevronR:'<path d="M9 5.5 15.5 12 9 18.5"/>',
+    chevronL:'<path d="M15.5 5.5 9 12l6.5 6.5"/>',
+    chevronD:'<path d="M6 9.5 12 15.5 18 9.5"/>',
+    play:'<path d="M7 4.8v14.4L19 12 7 4.8Z" fill="currentColor" stroke="none"/>',
+    pause:'<rect x="6" y="4.5" width="4" height="15" rx="1.4" fill="currentColor" stroke="none"/><rect x="14" y="4.5" width="4" height="15" rx="1.4" fill="currentColor" stroke="none"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>',
+    minus:'<path d="M5 12h14"/>',
+    download:'<path d="M12 3v12M7 10.5 12 15.5 17 10.5M4 20h16"/>',
+    upload:'<path d="M12 15.5v-12M7 8.5 12 3.5l5 5M4 20h16"/>',
+    trash:'<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13.5h9l1-13.5M10 11v6M14 11v6"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/>',
+    warn:'<path d="M12 3 22 20H2L12 3Z"/><path d="M12 10v4.5M12 17.4v.2"/>',
+    flame:'<path d="M12 22c4 0 7-2.8 7-6.7 0-3.2-2-5.3-3.6-7.3-.9 1-1.3 2.1-1.4 3.3C13 9.4 12.2 6.2 9.5 3c-.4 3-1.7 4.6-3 6.4C5.4 10.9 5 12.5 5 14.3 5 19.2 8 22 12 22Z"/>',
+    walk:'<circle cx="13" cy="4.4" r="2"/><path d="M10 21.5 12 16l-2.2-3 1.4-5 2.8 3 3 .8M9.8 8.5 6.5 10l.6 3.4M13.5 16l1.8 5.5"/>',
+    scale:'<path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M12 8v4l2.8 1.6"/><circle cx="12" cy="7.4" r="1" fill="currentColor" stroke="none"/>',
+    target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    moon:'<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"/>',
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/>',
+    monitor:'<rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M9 21h6M12 17.5V21"/>',
+    x:'<path d="M6 6l12 12M18 6 6 18"/>',
+    heart:'<path d="M12 20.5S3.5 15 3.5 9.3C3.5 6.4 5.7 4 8.6 4c1.5 0 2.7.7 3.4 1.8C12.7 4.7 14 4 15.4 4c2.9 0 5.1 2.4 5.1 5.3C20.5 15 12 20.5 12 20.5Z"/>',
+    water:'<path d="M12 2.7S6 9.5 6 14a6 6 0 0 0 12 0c0-4.5-6-11.3-6-11.3Z"/>',
+    steps:'<circle cx="15.5" cy="4.5" r="1.8"/><path d="M14.5 8.5c1.5 2.5 4 3 4.5 6 .3 2-.5 3.5-2 4M13 9.5 9.5 8c-2 .8-3 2.5-2.7 4.8.4 2.7 2.7 3.2 3.7 5.7.8 2-.3 3.5-1.5 4"/>',
+    book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2.5H6.5A2.5 2.5 0 0 0 4 5v14.5Z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+    flag:'<path d="M5 21V4"/><path d="M5 5c4-2.2 7 1.8 12 0v9c-5 1.8-8-2.2-12 0"/>',
+    note:'<path d="M5 4h14v13l-4 4H5V4Z"/><path d="M15 21v-4h4M9 9h6M9 13h4"/>',
+    search:'<circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.5-4.5"/>',
+    gym:'<path d="M7 12h10M4.5 8.5v7M19.5 8.5v7M2.5 10v4M21.5 10v4M7 6.5v11M17 6.5v11"/>',
+    zzz:'<path d="M4 8h6l-6 7h6M13 4h5l-5 6h5"/>',
+    bike:'<circle cx="6" cy="17" r="3.5"/><circle cx="18" cy="17" r="3.5"/><path d="M6 17 9.5 9H15M15 9l3 8M9.5 9 13 17M13 6.5h3"/>',
+    swim:'<circle cx="16.5" cy="6" r="1.8"/><path d="M3 15.5c2-1.6 4-1.6 6 0s4 1.6 6 0 4-1.6 6 0M3 20c2-1.6 4-1.6 6 0s4 1.6 6 0 4-1.6 6 0"/>',
+    egg:'<path d="M12 3C8.5 3 5.5 8 5.5 13a6.5 6.5 0 0 0 13 0C18.5 8 15.5 3 12 3Z"/><path d="M9.5 12.5c0-2.5 1-4.5 2.5-5.5"/>',
+    rice:'<path d="M4 13a8 8 0 0 1 16 0M4 13h16M4 13c0 4 3.5 7 8 7s8-3 8-7"/><path d="M9 9.5 10 7M13 9 12.5 6.5M16 10l1-2"/>',
+    veg:'<path d="M12 21c-4.5 0-7.5-3-7.5-7.2C4.5 9 8 4.5 12 3c4 1.5 7.5 6 7.5 10.8 0 4.2-3 7.2-7.5 7.2Z"/><path d="M12 21v-8M12 13c0-3 1.5-5 3.5-6"/>',
+    recovery:'<path d="M12 21c4.5 0 8-3.5 8-8 0-4.4-3.5-8-8-8-4 0-7.4 2.8-8 6.5"/><path d="M4 4v5.5h5.5"/>'
+  };
+  const cache = {};
+  return function icon(name, size = 20){
+    const key = name + size;
+    if(cache[key]) return cache[key];
+    const svg = '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.info)+'</svg>';
+    cache[key] = svg;
+    return svg;
+  };
+})();
+function icWrap(name, cls){ return '<span class="'+(cls||'')+'" aria-hidden="true">'+Icon(name)+'</span>'; }
+
+/* ============================================================
+   2. SVG FIGURE FACTORY (người minh họa tối giản, start/end + mũi tên)
+   ============================================================ */
+function figSVG(name, phase, anim){
+  // phase: "a" (start) | "b" (end)
+  const p = phase === "b" ? "b" : "a";
+  const head = (cx,cy)=> '<circle class="head" cx="'+cx+'" cy="'+cy+'" r="8.5"/>';
+  const limb = (cls,d)=> '<path class="'+cls+'" d="'+d+'"/>';
+  const arrow = (d)=> '<path class="arrow" d="'+d+'"/>';
+  const guide = (d)=> '<path class="guide" d="'+d+'"/>';
+  const label = (x,y,t)=> '<text class="lbl" x="'+x+'" y="'+y+'">'+t+'</text>';
+  const db = (x,y,r)=> '<circle class="eq" cx="'+x+'" cy="'+y+'" r="'+r+'"/><circle class="eq" cx="'+(x+r+3)+'" cy="'+y+'" r="'+(r*0.72)+'"/>';
+  const dumb2 = (x,y,r)=> '<circle class="eq" cx="'+(x-9)+'" cy="'+y+'" r="'+r+'"/><circle class="eq" cx="'+(x+9)+'" cy="'+y+'" r="'+r+'"/><line class="eqline" x1="'+(x-9)+'" y1="'+y+'" x2="'+(x+9)+'" y2="'+y+'"/>';
+  let g = '';
+  const ground = '<path class="g" d="M20 206 H320"/>';
+
+  switch(name){
+    case "goblet-squat":
+      if(p==="a"){
+        g = head(150,60) + limb("body","M150 69 V140 M150 88 L132 96 M150 88 L172 78 M150 140 L138 204 M150 140 L166 204")
+          + db(174,72,7) + '<path class="body" d="M172 78 L180 74"/>'
+          + guide("M126 96 A40 40 0 0 1 174 96") + label(24,60,"ĐỨNG");
+      } else {
+        g = head(150,98) + limb("body","M150 107 L128 148 L150 172 L172 148 Z M128 148 L108 138 M128 148 L106 158 M108 138 L104 178 M106 158 L98 196 M150 172 L138 204 M150 172 L166 204")
+          + db(178,112,7) + '<path class="body" d="M136 118 L172 105"/>'
+          + arrow("M150 60 V86") + label(24,44,"HẠ HÔNG ↓");
+      }
+      break;
+    case "romanian-deadlift":
+      if(p==="a"){
+        g = head(150,48) + limb("body","M150 57 V142 M150 70 L132 108 M150 70 L172 104 M150 142 L140 204 M150 142 L162 204")
+          + dumb2(176,122,6) + guide("M150 60 V120") + label(24,40,"ĐỨNG THẲNG");
+      } else {
+        g = head(212,92) + limb("body","M212 101 L164 140 M198 110 L172 140 M212 101 L182 122 M164 140 L152 204 M164 140 L178 204")
+          + dumb2(178,158,6) + arrow("M240 80 Q250 100 224 128") + label(24,40,"ĐẨY MÔNG RA SAU") + guide("M212 130 V200");
+      }
+      break;
+    case "hip-thrust":
+      g = '<rect class="eq" x="52" y="118" width="46" height="34" rx="6"/>' + ground;
+      if(p==="a"){
+        g += head(128,110) + limb("body","M136 122 L188 156 L182 196 M188 156 L232 152 M232 152 L238 204 M188 156 L176 160");
+        g += db(178,176,8) + label(24,40,"HÔNG THẤP");
+      } else {
+        g += head(132,96) + limb("body","M140 108 L192 128 L186 196 M192 128 L234 152 M234 152 L238 204 M192 128 L180 134");
+        g += db(174,148,8) + arrow("M166 176 Q164 150 178 134") + label(24,40,"NHẤN HÔNG LÊN ↑");
+      }
+      break;
+    case "reverse-lunge":
+      if(p==="a"){
+        g = head(150,52) + limb("body","M150 61 V136 M150 76 L134 92 M150 76 L170 66 M150 136 L140 204 M150 136 L162 204") + label(24,40,"ĐỨNG");
+      } else {
+        g = head(150,58) + limb("body","M150 67 L148 130 M150 78 L136 92 M150 78 L170 68 M148 130 L128 188 L118 204 M148 130 L172 168 L186 204")
+          + arrow("M150 40 V52") + guide("M118 130 H186") + label(24,40,"HẠ THẲNG XUỐNG ↓");
+      }
+      break;
+    case "lat-pulldown":
+      g = '<rect class="eq" x="104" y="150" width="96" height="12" rx="6"/>' + '<path class="body" d="M128 162 v34 M176 162 v34"/>' + ground;
+      if(p==="a"){
+        g += '<line class="cable" x1="152" y1="150" x2="152" y2="28"/>' + '<rect class="eq" x="136" y="22" width="32" height="10" rx="5"/>'
+          + head(150,74) + limb("body","M150 83 V150 M150 96 L126 76 M150 96 L174 76");
+        g += label(24,40,"VAI CAO · TAY DUỖI");
+      } else {
+        g += '<line class="cable" x1="152" y1="120" x2="152" y2="28"/>' + '<rect class="eq" x="126" y="88" width="52" height="10" rx="5"/>'
+          + head(150,74) + limb("body","M150 83 V150 M150 96 L128 104 M150 96 L172 104");
+        g += arrow("M108 60 Q100 88 120 100") + label(24,40,"KÉO KHUỶU XUỐNG ↓");
+      }
+      break;
+    case "seated-cable-row":
+      g = '<rect class="eq" x="36" y="88" width="70" height="14" rx="7"/><line class="cable" x1="106" y1="95" x2="150" y2="95"/><rect class="eq" x="36" y="140" width="70" height="10" rx="5"/>' + ground;
+      if(p==="a"){
+        g += '<line class="cable" x1="106" y1="95" x2="180" y2="112"/><rect class="eq" x="176" y="106" width="16" height="12" rx="4"/>'
+          + head(226,84) + limb("body","M220 92 L188 112 M220 104 L192 118 M188 112 L184 118 M220 92 L242 140 M242 140 L236 204 M220 104 L250 150 M250 150 L246 204");
+        g += label(150,40,"TAY DUỖI · LÕM LƯNG");
+      } else {
+        g += '<line class="cable" x1="106" y1="95" x2="146" y2="98"/><rect class="eq" x="130" y="90" width="16" height="12" rx="4"/>'
+          + head(196,84) + limb("body","M206 94 L162 98 M208 104 L164 102 M162 98 L158 104 M196 96 L238 140 M238 140 L232 204 M210 108 L246 150 M246 150 L240 204");
+        g += arrow("M240 80 Q230 70 214 76") + label(24,40,"KÉO GẦN BỤNG");
+      }
+      break;
+    case "dumbbell-chest-press":
+      g = '<rect class="eq" x="84" y="140" width="140" height="18" rx="8"/>' + '<path class="body" d="M100 158 v46 M208 158 v46"/>' + ground;
+      if(p==="a"){
+        g += head(154,116) + limb("body","M142 146 L118 118 M166 146 L190 118 M118 118 L112 96 M190 118 L196 96");
+        g += dumb2(112,88,7) + dumb2(196,88,7) + label(24,40,"TẠ Ở NGỰC");
+      } else {
+        g += head(154,116) + limb("body","M142 146 L120 112 M166 146 L188 112");
+        g += dumb2(122,72,7) + dumb2(186,72,7) + arrow("M112 100 Q112 84 120 76") + arrow("M196 100 Q196 84 188 76") + label(24,40,"ĐẨY LÊN ↑");
+      }
+      break;
+    case "dumbbell-shoulder-press":
+      if(p==="a"){
+        g = head(150,74) + limb("body","M150 83 V168 M150 98 L128 116 M150 98 L172 116 M150 168 L140 204 M150 168 L160 204");
+        g += dumb2(126,116,6.5) + dumb2(174,116,6.5) + label(24,40,"TẠ NGANG VAI");
+      } else {
+        g = head(150,74) + limb("body","M150 83 V168 M150 98 L126 82 M150 98 L174 82 M150 168 L140 204 M150 168 L160 204");
+        g += dumb2(122,62,6.5) + dumb2(178,62,6.5) + arrow("M128 110 V70") + arrow("M172 110 V70") + label(24,40,"ĐẨY THẲNG LÊN ↑");
+      }
+      break;
+    case "lateral-raise":
+      if(p==="a"){
+        g = head(150,58) + limb("body","M150 67 V158 M150 84 L134 128 M150 84 L166 128 M150 158 L140 204 M150 158 L160 204");
+        g += dumb2(133,136,5.5) + dumb2(167,136,5.5) + label(24,40,"TAY DỌC THÂN");
+      } else {
+        g = head(150,58) + limb("body","M150 67 V158 M150 84 L114 92 M150 84 L186 92 M150 158 L140 204 M150 158 L160 204");
+        g += dumb2(102,90,5.5) + dumb2(198,90,5.5) + arrow("M134 122 Q120 106 110 98") + arrow("M166 122 Q180 106 190 98") + guide("M150 90 H96 M150 90 H204") + label(24,40,"NÂNG NGANG VAI");
+      }
+      break;
+    case "dead-bug":
+      if(p==="a"){
+        g = head(96,150) + limb("body","M108 156 H250 M108 156 L112 150 M250 156 L244 150 M110 154 L86 122 M108 158 L84 188")
+          + guide("M112 172 H248") + label(24,40,"CHUẨN BỊ");
+      } else {
+        g = head(96,150) + limb("body","M108 156 H250 M110 154 L78 132 M108 158 L82 196 M248 154 L280 136 M250 158 L282 172")
+          + arrow("M84 120 Q74 128 76 140") + arrow("M284 132 Q296 140 292 152")
+          + guide("M112 172 H248") + label(24,40,"DUỖI CHÉO TAY-CHÂN");
+      }
+      break;
+    case "plank":
+      g = ground;
+      if(p==="a"){
+        g += head(88,120) + limb("body","M100 132 H236 M100 132 L100 172 M236 132 L244 204 M100 132 L112 122 M112 122 H150") ;
+        g += label(24,40,"CHUẨN BỊ");
+      } else {
+        g += head(88,120) + limb("body","M100 132 H236 M100 132 L100 172 M236 132 L244 204 M100 132 L112 122 M112 122 H150")
+          + arrow("M170 110 Q170 122 170 130") + guide("M96 150 H240") + label(24,40,"GIỮ · SIẾT BỤNG-MÔNG");
+      }
+      break;
+    case "pushup":
+      g = ground;
+      if(p==="a"){
+        g += head(84,112) + limb("body","M96 124 H232 M232 124 L244 204 M96 124 L102 204 M232 124 L240 132 M240 132 H262 M262 132 L262 204");
+        g += label(24,40,"VỊ TRÍ CAO");
+      } else {
+        g += head(84,142) + limb("body","M96 154 H236 M236 154 L244 204 M96 154 L100 204 M236 154 L242 162 M242 162 H262 M262 162 L262 204");
+        g += arrow("M168 120 V146") + guide("M90 168 H236") + label(24,40,"HẠ NGỰC ↓");
+      }
+      break;
+    case "onearm-row":
+      g = '<rect class="eq" x="60" y="128" width="64" height="16" rx="7"/>' + '<path class="body" d="M76 144 v60 M108 144 v60"/>' + ground;
+      if(p==="a"){
+        g += head(176,86) + limb("body","M170 94 L112 136 M170 94 L206 150 M206 150 L200 204 M170 94 L188 120 M188 120 L194 138");
+        g += db(198,148,6.5) + label(24,40,"TAY DUỖI XUỐNG");
+      } else {
+        g += head(176,86) + limb("body","M170 94 L112 136 M170 94 L204 142 M206 150 L200 204 M170 94 L190 116 M190 116 L194 132");
+        g += db(198,128,6.5) + arrow("M212 160 Q216 144 206 134") + label(24,40,"KÉO KHUỶU VỀ HÔNG");
+      }
+      break;
+    default:
+      g = head(150,60) + limb("body","M150 69 V140 M150 140 L140 204 M150 140 L160 204") + label(24,40,"");
+  }
+  const title = p==="a" ? "BẮT ĐẦU" : "KẾT THÚC";
+  return '<svg class="svgfig" viewBox="0 0 340 230" role="img" aria-label="Minh họa '+title+'" preserveAspectRatio="xMidYMid meet">'
+    + '<rect x="8" y="8" rx="14" width="324" height="212" fill="none" stroke="var(--border)" stroke-width="1.5" opacity=".8"/>'
+    + '<text x="302" y="30" text-anchor="end" class="note">'+title+'</text>'
+    + ground + g + '</svg>';
+}
+
+/* Animated figure: play = alternate a/b ~3s cycle */
+const figTimers = new Map();
+function figHTML(name){
+  return '<div class="fig-anim" data-fig="'+name+'" data-playing="0">'
+    + '<div class="fig-a">'+figSVG(name,"a")+'</div>'
+    + '<div class="fig-b" aria-hidden="true">'+figSVG(name,"b")+'</div>'
+    + '</div>';
+}
+function toggleFigAnim(el, force){
+  if(!el) return false;
+  const on = force !== undefined ? force : el.dataset.playing !== "1";
+  el.dataset.playing = on ? "1" : "0";
+  el.classList.toggle("playing", on);
+  clearInterval(figTimers.get(el));
+  if(on){
+    const t = setInterval(()=> el.classList.toggle("playing"), 1500);
+    figTimers.set(el, t);
+  }
+  return on;
+}
+function stopAllFigs(){
+  document.querySelectorAll('.fig-anim[data-playing="1"]').forEach(el=> toggleFigAnim(el,false));
+}
+
+/* ============================================================
+   3. PROGRAM DATA (source of truth: PDF)
+   ============================================================ */
+const EQUIP = { db:"Tạ đơn", dbs:"2 tạ đơn", gym:"Máy cable", bench:"Ghế", none:"Không tạ", mat:"Thảm", kb:"Kettlebell/balo" };
+const DIFF = { 1:"Dễ", 2:"Trung bình", 3:"Khá" };
+
+const EXERCISES = {
+  "goblet-squat":{
+    name:"Goblet Squat", group:"lower", primary:["Quads","Glutes","Core"],
+    sets:3, reps:"10–12", rest:90, restMax:120, equip:"db", diff:2, core:false, timebased:false,
+    cue:"Ngực cao — bụng chắc — gối theo mũi chân — đạp cả bàn chân.",
+    exec:["Đứng chân ngang vai hoặc rộng hơn nhẹ.","Mũi chân xoay ra khoảng 10–30°.","Giữ tạ sát ngực, hít vào và siết core.","Hạ hông xuống giữa hai chân.","Đầu gối di chuyển cùng hướng mũi chân.","Đạp cả bàn chân (gót + gan bàn chân) xuống sàn.","Đứng lên và thở ra gần cuối rep."],
+    mistakes:[["Gối chụm vào trong","Đẩy gối theo hướng ngón chân."],["Gót chân nhấc","Giảm độ sâu hoặc mở chân rộng hơn một chút."],["Gù lưng / đổ người quá nhiều","Giảm tạ, giữ tạ sát ngực, siết core."],["Cố squat quá sâu mất form","Dừng ở độ sâu vẫn giữ thân trung lập."]],
+    starters:"6–10 kg"
+  },
+  "romanian-deadlift":{
+    name:"Romanian Deadlift (RDL)", group:"lower", primary:["Glutes","Hamstrings"],
+    sets:3, reps:"10–12", rest:90, restMax:120, equip:"dbs", diff:2, core:false, timebased:false,
+    cue:"Đẩy mông ra sau — không cúi lưng xuống.",
+    exec:["Chân rộng bằng hông, đầu gối hơi chùng.","Giữ tạ sát chân.","Đẩy hông/mông ra sau như muốn chạm tường.","Cẳng chân gần thẳng đứng.","Hạ đến khi đùi sau căng rõ nhưng lưng vẫn trung lập.","Siết mông, đưa hông về trước và đứng thẳng."],
+    mistakes:[["Biến RDL thành squat","Giữ cẳng chân gần thẳng đứng."],["Tạ đặt quá xa chân","Kéo tạ sát đùi/ngực chân trong suốt chuyển động."],["Hạ xuống quá thấp","Dừng khi đùi sau căng và lưng còn phẳng."],["Đau lưng dưới","Giảm tạ, kiểm tra kỹ thuật hip hinge."]],
+    starters:"2 × 4–8 kg"
+  },
+  "hip-thrust":{
+    name:"Hip Thrust", group:"lower", primary:["Glutes","Hamstrings"],
+    sets:3, reps:"12–15", rest:75, restMax:90, equip:"bench", diff:2, core:false, timebased:false,
+    cue:"Xương sườn xuống — cằm thu — siết mông ở đỉnh.",
+    exec:["Tựa bả vai lên mép ghế, bàn chân đặt chắc trên sàn.","Đẩy chân xuống sàn, nâng hông lên và siết mông.","Ở đỉnh: cẳng chân gần thẳng đứng, xương sườn hạ xuống, cằm thu.","Giữ đỉnh 1 giây rồi hạ có kiểm soát."],
+    mistakes:[["Ưỡn lưng (hyperextend)","Thu cằm và “cuộn” xương chậu, siết mông."],["Chân quá gần/qua xa thân","Điều chỉnh tới khi đỉnh cẳng chân gần thẳng đứng."],["Đẩy bằng mũi chân","Giữ toàn bộ bàn chân tiếp xúc sàn."],["Nảy nhanh ở đáy","Đẩy kiểm soát nhịp, không dùng quán tính."]],
+    starters:"10–20 kg/balo"
+  },
+  "reverse-lunge":{
+    name:"Reverse Lunge", group:"lower", primary:["Glutes","Quads","Balance"],
+    sets:3, reps:"8–10/chân", rest:60, restMax:90, equip:"none", diff:2, core:false, timebased:false,
+    cue:"Bước ra sau — hạ thẳng xuống — đạp chân trước.",
+    exec:["Đứng thẳng, bước một chân ra sau đủ xa.","Hạ gối sau gần sàn, chân trước chịu lực chính.","Đầu gối trước đi theo hướng mũi chân.","Đạp chân trước xuống sàn để trở về vị trí đứng."],
+    mistakes:[["Bước quá ngắn","Giữ gối và hông khớp vào vị trí thoải mái."],["Gối trước đổ vào trong","Giảm tạ và kiểm soát hướng gối."],["Mất thăng bằng","Bám nhẹ vào tường/ghế khi mới tập."],["Dùng chân sau đẩy quá nhiều","Tập trung lực vào chân trước."]],
+    starters:"Không tạ → 2 × 2–5 kg"
+  },
+  "lat-pulldown":{
+    name:"Lat Pulldown", group:"upper", primary:["Lats","Upper back","Biceps"],
+    sets:3, reps:"10–12", rest:75, restMax:90, equip:"gym", diff:1, core:false, timebased:false,
+    cue:"Ngực mở — vai hạ — kéo khuỷu xuống.",
+    exec:["Ngồi chắc, đùi cố định dưới miếng đệm, ngực mở nhẹ.","Nắm thanh rộng hơn vai vừa phải.","Kéo khuỷu tay xuống và về phía sàn; thanh hướng về ngực trên.","Trả lên chậm tới khi xà cơ kéo dài nhưng vai vẫn kiểm soát."],
+    mistakes:[["Kéo thanh sau gáy","Luôn kéo về phía trước ngực."],["Ngả người quá xa","Giảm tạ và giữ thân ổn định."],["Dùng biceps quá nhiều","Nghĩ “kéo khuỷu tay xuống túi”."],["Giật tạ","Giảm tải và dùng nhịp chậm hơn."]],
+    starters:"Theo máy"
+  },
+  "seated-cable-row":{
+    name:"Seated Cable Row", group:"upper", primary:["Mid back","Lats","Biceps"],
+    sets:3, reps:"10–12", rest:75, restMax:90, equip:"gym", diff:1, core:false, timebased:false,
+    cue:"Kéo bằng khuỷu tay — không giật bằng thân người.",
+    exec:["Ngồi cao ngồi, giữ hơi chùng và chân chắc.","Bắt đầu với tay duỗi, vai tự do đi ra trước nhẹ.","Kéo tay cầm về gần bụng; khuỷu đi về phía sau.","Duỗi ngọn để kết thúc rồi duỗi tay lại có kiểm soát."],
+    mistakes:[["Ngả người ra sau quá nhiều","Giữ thân gần cố định."],["Nhún vai","Kéo vai xuống xa tai."],["Kéo tay cầm quá cao","Hướng về bụng/rốn."],["Thả weight stack rơi","Kiểm soát cả pha kéo và pha trả."]],
+    starters:"Theo máy"
+  },
+  "dumbbell-chest-press":{
+    name:"Dumbbell Chest Press", group:"upper", primary:["Chest","Triceps","Front delts"],
+    sets:3, reps:"8–12", rest:90, restMax:90, equip:"bench", diff:2, core:false, timebased:false,
+    cue:"Vai ổn định — khuỷu chéo — đẩy lên trên ngực.",
+    exec:["Nằm chắc trên ghế, hai chân tựa trên sàn.","Tạ ở hai bên ngực; khuỷu tay khoảng 30–60° so với thân.","Đẩy tạ lên trên ngực, không cần cho hai tạ va nhau.","Hạ chậm tới vị trí thoải mái của vai rồi lặp lại."],
+    mistakes:[["Khuỷu bung ngang 90°","Thu khuỷu xuống một chút."],["Vai nhô lên sát tai","Kéo bờ vai xuống và giữ ổn định."],["Cong lưng quá mức","Siết bụng và giữ chân chắc."],["Tạ quá nặng làm lệch đường đi của tạ","Giảm tạ."]],
+    starters:"2 × 3–6 kg"
+  },
+  "dumbbell-shoulder-press":{
+    name:"Dumbbell Shoulder Press", group:"upper", primary:["Shoulders","Triceps"],
+    sets:3, reps:"8–12", rest:75, restMax:90, equip:"bench", diff:2, core:false, timebased:false,
+    cue:"Bụng chắc — xương sườn không bật lên — đẩy thẳng.",
+    exec:["Ngồi dựa chắc, chân tựa ổn định.","Tạ bắt đầu ngang vai, cẳng tay gần thẳng.","Siết bụng rồi đẩy tạ lên trên đầu.","Hạ xuống có kiểm soát đến ngang vai."],
+    mistakes:[["Ưỡn lưng dưới","Đẩy tạ nhẹ hơn, siết mông và bụng."],["Đập hai tạ vào nhau ở đỉnh","Dừng trước khi chạm."],["Cổ đưa ra trước","Giữ đầu trung lập."],["Biên độ gây khó chịu vai","Dùng biên độ thoải mái."]],
+    starters:"2 × 2–5 kg"
+  },
+  "lateral-raise":{
+    name:"Lateral Raise", group:"upper", primary:["Side delts"],
+    sets:3, reps:"12–15", rest:45, restMax:60, equip:"dbs", diff:1, core:false, timebased:false,
+    cue:"Đẩy khuỷu tay sang hai bên — không nhún vai.",
+    exec:["Đứng ổn định, khuỷu hơi cong, tạ ở hai bên đùi.","Nâng cánh tay sang hai bên bằng cách dẫn bằng khuỷu.","Dừng khoảng ngang vai; không cần nâng cao hơn.","Hạ chậm 2–3 giây."],
+    mistakes:[["Tạ quá nặng và vung người","Giảm tạ."],["Nhún vai sát tai","Giữ vai thấp, cổ dài."],["Nâng bàn tay cao hơn khuỷu quá nhiều","Giữ tay và khuỷu gần ngang."],["Làm quá nhanh","Đầu tiên kiểm soát nhịp."]],
+    starters:"2 × 1–3 kg"
+  },
+  "dead-bug":{
+    name:"Dead Bug", group:"core", primary:["Deep core"],
+    sets:3, reps:"8–10/bên", rest:45, restMax:60, equip:"mat", diff:1, core:true, timebased:false,
+    cue:"Xương sườn xuống — lưng dưới giữ ổn định.",
+    exec:["Nằm ngửa, hông và gối khoảng 90°, tay hướng lên.","Áp nhẹ lưng dưới vào sàn và thở đều.","Duỗi chậm tay phải + chân trái, rồi trả lại.","Đổi bên; chỉ duỗi xa tới mức lưng dưới vẫn không nhấc."],
+    mistakes:[["Lưng dưới cong khỏi sàn","Giảm biên độ duỗi."],["Di chuyển quá nhanh","Mỗi rep chậm và có kiểm soát."],["Nín thở","Duy trì nhịp thở nhẹ, đều."],["Cổ căng","Thả lỏng cổ, nhìn thẳng lên."]],
+    starters:"Trọng lượng cơ thể"
+  },
+  "plank":{
+    name:"Plank", group:"core", primary:["Core","Shoulders","Glutes"],
+    sets:3, reps:"30–45 giây", rest:45, restMax:60, equip:"mat", diff:1, core:true, timebased:true,
+    cue:"Siết bụng — siết mông — thở đều.",
+    exec:["Khuỷu tay dưới vai, cẳng tay bám sàn.","Siết bụng và mông; giữ đầu, thân, chân thành đường thẳng tương đối thẳng.","Đẩy nhẹ sàn ra xa để vai ổn định.","Dừng set khi lưng bắt đầu võng hoặc mông nhấc cao."],
+    mistakes:[["Võng lưng","Siết mông, rút ngắn thời gian set."],["Mông quá cao","Đưa hông xuống về đường thẳng."],["Nín thở","Duy trì nhịp thở nhẹ, đều."],["Cố giữ quá lâu bằng form xấu","Kết thúc sớm hơn, form tốt hơn."]],
+    starters:"Trọng lượng cơ thể"
+  },
+  "pushup":{
+    name:"Push-up / Incline Push-up", group:"upper", primary:["Chest","Triceps","Core"],
+    sets:3, reps:"8–12", rest:75, restMax:90, equip:"none", diff:2, core:false, timebased:false,
+    cue:"Toàn thân như một tấm ván. Khuỷu 30–45°.",
+    exec:["Tay rộng hơn vai nhẹ; toàn thân giữ như một tấm ván.","Hạ ngực về phía sàn/bàn; khuỷu hướng chéo 30–45°.","Giữ hông không võng và có trung lập.","Đẩy sàn ra xa để trở về vị trí đầu."],
+    mistakes:[["Hông võng xuống","Nâng tay lên mặt bàn cao hơn."],["Khuỷu bung ngang 90°","Thu khuỷu vào."],["Chỉ cúi đầu thay vì hạ cả thân","Giữ cơ thể thành một khối."],["Gắng lực trên sàn khi chưa đủ","Bắt đầu incline push-up."]],
+    progression:["Tường","Bàn cao","Ghế cao","Ghế thấp","Sàn"],
+    starters:"Trọng lượng cơ thể"
+  },
+  "onearm-row":{
+    name:"One-arm Dumbbell Row", group:"upper", primary:["Back","Lats","Biceps"],
+    sets:3, reps:"10–12/bên", rest:60, restMax:75, equip:"db", diff:2, core:false, timebased:false,
+    cue:"Kéo khuỷu tay về “túi quần sau”.",
+    exec:["Một tay chống ghế, hông đẩy ra sau, lưng trung lập.","Tay cầm tạ duỗi xuống nhưng vai vẫn kiểm soát.","Kéo khuỷu tay về phía hông, không kéo lên sát vai.","Duỗi ngọn rồi hạ tạ chậm."],
+    mistakes:[["Xoay người mạnh","Giảm tạ và giữ xương chậu ổn định."],["Nhún vai","Kéo vai xuống, cổ dài."],["Cong lưng","Siết bụng và chỉnh vị trí chân."],["Giật tạ","Dừng nhịp: 1–2 giây kéo, 2–3 giây hạ."]],
+    starters:"3–6 kg"
+  }
+};
+const EX_IDS = Object.keys(EXERCISES);
+const findEx = id => EXERCISES[id];
+
+const WORKOUTS = {
+  A:{ key:"A", title:"Chân & Mông", full:"Buổi A — Chân & Mông", mins:"50–60", desc:"Goblet Squat, RDL, Hip Thrust, Reverse Lunge, Plank",
+      exList:["goblet-squat","romanian-deadlift","hip-thrust","reverse-lunge","plank"] },
+  B:{ key:"B", title:"Thân Trên + Core", full:"Buổi B — Thân Trên + Core", mins:"45–55", desc:"Lat Pulldown, Seated Row, Chest Press, Shoulder Press, Lateral Raise, Dead Bug",
+      exList:["lat-pulldown","seated-cable-row","dumbbell-chest-press","dumbbell-shoulder-press","lateral-raise","dead-bug"] },
+  C:{ key:"C", title:"Full Body", full:"Buổi C — Full Body", mins:"50–60", desc:"Goblet Squat, RDL, One-arm Row, Push-up, Hip Thrust, Lateral Raise, Plank",
+      exList:["goblet-squat","romanian-deadlift","onearm-row","pushup","hip-thrust","lateral-raise","plank"] }
+};
+
+/* schedule per weekday: 0=CN..6=T2 (JS getDay) */
+const SCHEDULE = {
+  1:{ type:"strength", wo:"A", label:"Strength — Buổi A", sub:"Chân & Mông · 50–60 phút" },
+  2:{ type:"cardio", label:"Cardio — Đi bộ nhanh", sub:"30–45 phút · RPE 5–6/10" },
+  3:{ type:"strength", wo:"B", label:"Strength — Buổi B", sub:"Thân trên + core · 45–55 phút" },
+  4:{ type:"recovery", label:"Recovery — Đi bộ nhẹ", sub:"20–30 phút" },
+  5:{ type:"strength", wo:"C", label:"Strength — Buổi C", sub:"Full body · 50–60 phút" },
+  6:{ type:"cardio", label:"Cardio nhẹ", sub:"Đi bộ / xe đạp / bơi · 30–45 phút" },
+  0:{ type:"rest", label:"Nghỉ hoàn toàn", sub:"Ngủ đủ · hồi phục" }
+};
+const DOW = ["CN","T2","T3","T4","T5","T6","T7"];
+const DOW_FULL = {1:"Thứ Hai",2:"Thứ Ba",3:"Thứ Tư",4:"Thứ Năm",5:"Thứ Sáu",6:"Thứ Bảy",0:"Chủ Nhật"};
+
+const PHASES = [
+  { num:"PHASE 1", name:"Foundation", weeks:[1,2], tag:"Tuần 1–2",
+    points:["2 set/bài — học kỹ thuật","Tạ nhẹ đến vừa","Không tập đến kiệt sức (RIR 3–4)","Ghi cảm giác sau buổi tập"] },
+  { num:"PHASE 2", name:"Build Habit", weeks:[3,4], tag:"Tuần 3–4",
+    points:["Chuyển sang 3 set/bài","Bắt đầu ghi rep & mức tạ","RIR khoảng 2","Duy trì 3 buổi/tuần"] },
+  { num:"PHASE 3", name:"Progressive Overload", weeks:[5,8], tag:"Tuần 5–8",
+    points:["Giữ 3 set","Tăng rep trước, tăng tạ sau","Cải thiện kỹ thuật liên tục","Theo dõi trung bình tuần"] },
+  { num:"PHASE 4", name:"Fat Loss & Performance", weeks:[9,12], tag:"Tuần 9–12",
+    points:["3–4 set bài chính nếu hồi phục tốt","Giữ strength training đều đặn","Cardio vừa phải","Không tập kiệt sức"] }
+];
+const phaseOfWeek = w => PHASES.find(ph => w >= ph.weeks[0] && w <= ph.weeks[1]);
+
+/* ============================================================
+   4. STATE & STORAGE
+   ============================================================ */
+const APP_VERSION = 1;
+const LS_KEY = "f12CoachState";
+const DEFAULT_STATE = () => ({
+  version: APP_VERSION,
+  onboarded:false,
+  profile:{ age:22, sex:"female", height:166, startingWeight:63, targetWeight:59, startDate:"" },
+  program:{ currentWeek:1, completedWeeks:[] },
+  workouts:[],   // completed workouts
+  bodyWeight:[], // {date, kg}
+  waist:[],      // {date, cm}
+  steps:{},      // {"2026-09-16": 8000}
+  habits:{},     // {"2026-09-16": {water:1,protein:1,steps:1,workout:1,sleep:1}}
+  cardio:[],     // {date, type, duration, distance, effort, notes}
+  meals:{},      // {"2026-09-16": ["b","l","s","d"]}
+  reviews:{},    // {week: {feel, notes, completed}}
+  budget:60000,
+  settings:{ theme:"system", restAuto:true, defaultRest:90 },
+  weeklyReviewDone:{}
+});
+let state = null;
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign(DEFAULT_STATE(), parsed);
+      state.profile = Object.assign(DEFAULT_STATE().profile, parsed.profile||{});
+      state.settings = Object.assign(DEFAULT_STATE().settings, parsed.settings||{});
+      state.program = Object.assign(DEFAULT_STATE().program, parsed.program||{});
+    } else {
+      state = DEFAULT_STATE();
+    }
+  }catch(e){ state = DEFAULT_STATE(); }
+}
+let saveTimer = null;
+const SAVE_DELAY = 60;
+function saveState(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){ console.warn("Save failed", e); }
+  }, SAVE_DELAY);
+}
+function flushState(){
+  clearTimeout(saveTimer);
+  try{ if(state) localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+}
+window.addEventListener("pagehide", flushState);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") flushState(); });
+function todayKey(d){ d = d || new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function fmtDateVN(iso){ if(!iso) return "—"; const [y,m,dd] = iso.split("-"); return dd+"/"+m+"/"+y; }
+function parseISO(iso){ const [y,m,d] = iso.split("-").map(Number); return new Date(y, m-1, d); }
+function startOfWeek(d){ const x = new Date(d); const day = (x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
+function daysBetween(a,b){ return Math.round((parseISO(b)-parseISO(a))/86400000); }
+
+function currentProgramWeek(){
+  if(!state.profile.startDate) return state.program.currentWeek;
+  const diff = Math.floor(daysBetween(state.profile.startDate, todayKey())/7);
+  const w = Math.min(12, Math.max(1, diff+1));
+  state.program.currentWeek = w;
+  return w;
+}
+function weekRange(week){
+  if(!state.profile.startDate) return {start:null,end:null};
+  const s = parseISO(state.profile.startDate); s.setDate(s.getDate() + (week-1)*7);
+  const e = new Date(s); e.setDate(e.getDate()+6);
+  return { start: todayKey(s), end: todayKey(e) };
+}
+function dateInWeek(week, dateISO){
+  const r = weekRange(week);
+  if(!r.start) return false;
+  return dateISO >= r.start && dateISO <= r.end;
+}
+function weekOfDate(dateISO){
+  if(!state.profile.startDate) return state.program.currentWeek;
+  const diff = Math.floor(daysBetween(state.profile.startDate, dateISO)/7);
+  return Math.min(12, Math.max(1, diff+1));
+}
+/* which workout key is scheduled on a given date (based on DOW) */
+function scheduleFor(dateISO){ const d = parseISO(dateISO); return SCHEDULE[d.getDay()]; }
+/* workouts completed on a date */
+function workoutsOn(dateISO){ return state.workouts.filter(w=>w.date===dateISO); }
+function dayCompletedType(dateISO){
+  const sched = scheduleFor(dateISO);
+  const done = workoutsOn(dateISO);
+  const cardioDone = state.cardio.some(c=>c.date===dateISO);
+  if(done.length || (sched.type==="cardio" && cardioDone)) return sched.type;
+  return null;
+}
+
+/* stats */
+function stats(){
+  const wk = currentProgramWeek();
+  const totalPlan = 12*3;
+  const donePlan = Math.min(state.workouts.length, totalPlan);
+  const adherence = totalPlan ? Math.round(donePlan/totalPlan*100) : 0;
+  const startISO = state.profile.startDate ? state.profile.startDate : (state.workouts[0] ? state.workouts[0].date : todayKey());
+  const wThisWeek = state.workouts.filter(w => weekOfDate(w.date)===wk).length;
+  const cThisWeek = state.cardio.filter(c => weekOfDate(c.date)===wk).length;
+  return {
+    week: wk,
+    workoutsThisWeek: wThisWeek,
+    cardioThisWeek: cThisWeek,
+    totalWorkouts: state.workouts.length,
+    adherence,
+    startISO,
+    pct: Math.min(100, Math.round(((wk-1)/12)*100))
+  };
+}
+function latestWeight(){ return state.bodyWeight.length ? state.bodyWeight[state.bodyWeight.length-1].kg : null; }
+function weeklyAvgWeight(week){
+  const r = weekRange(week); if(!r.start) return null;
+  const entries = state.bodyWeight.filter(e=>e.date>=r.start && e.date<=r.end);
+  if(!entries.length) return null;
+  return entries.reduce((s,e)=>s+e.kg,0)/entries.length;
+}
+function avgWaist(fromISO,toISO){
+  const entries = state.waist.filter(e=>(!fromISO||e.date>=fromISO)&&(!toISO||e.date<=toISO));
+  if(!entries.length) return null;
+  return entries.reduce((s,e)=>s+e.cm,0)/entries.length;
+}
+function weeklyAvgSteps(week){
+  const r = weekRange(week); if(!r.start) return null;
+  const keys = Object.keys(state.steps).filter(k=>k>=r.start&&k<=r.end);
+  if(!keys.length) return null;
+  return keys.reduce((s,k)=>s+state.steps[k],0)/keys.length;
+}
+
+/* ============================================================
+   5. UTILITIES · TOAST · MODAL
+   ============================================================ */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmtNum(n){ return n==null?"—":Number(n).toLocaleString("vi-VN", {maximumFractionDigits:1}); }
+function fmtClock(sec){ sec = Math.max(0, Math.round(sec)); const m = Math.floor(sec/60), s = sec%60; return (m>=60? Math.floor(m/60)+":"+String(m%60).padStart(2,"0") : String(m).padStart(2,"0")) + ":" + String(s).padStart(2,"0"); }
+function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+let toastTimer = null;
+function toast(msg, iconName){
+  const root = $("#toastRoot");
+  root.innerHTML = '<div class="toast">'+ (iconName? '<span class="t-icon">'+Icon(iconName||"check",17)+'</span>':'') +'<span>'+esc(msg)+'</span></div>';
+  clearTimeout(toastTimer);
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{ const t = root.firstChild; if(t) t.classList.add("in"); }));
+  toastTimer = setTimeout(()=>{
+    const t = root.firstChild;
+    if(t){ t.classList.add("out"); setTimeout(()=>{ if(root.firstChild===t) root.innerHTML=""; },320); }
+  }, 2000);
+}
+
+const modalStack = [];
+function openModal(html, opts){
+  opts = opts||{};
+  const root = $("#modalRoot");
+  root.innerHTML = '<div class="modal" role="dialog" aria-modal="true">'+html+'</div>';
+  root.classList.add("open");
+  modalStack.push(opts.onClose||null);
+  if(!opts.static){
+    root.onclick = e => { if(e.target===root) closeModal(); };
+  } else {
+    root.onclick = null;
+  }
+}
+function closeModal(){
+  const root = $("#modalRoot");
+  root.classList.remove("open");
+  root.innerHTML = "";
+  const cb = modalStack.pop();
+  if(cb) cb();
+}
+
+/* ============================================================
+   6. THEME
+   ============================================================ */
+function applyTheme(){
+  const pref = state.settings.theme || "system";
+  let dark = pref === "dark";
+  if(pref === "system"){
+    dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+}
+window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ if(state && state.settings.theme==="system") applyTheme(); });
+</script>
+
+<script>
+"use strict";
+/* ============================================================
+   Part 3: VIEWS — dashboard, program, exercise library/detail,
+   workout engine, rest timer, cardio, progress, nutrition,
+   settings, onboarding, router wiring & init.
+   ============================================================ */
+
+/* ============================================================
+   NAVIGATION / ROUTER (hash-based)
+   ============================================================ */
+const NAVS = [
+  { view:"dashboard", label:"Trang chủ", icon:"home" },
+  { view:"program",   label:"Giáo trình", icon:"calendar" },
+  { view:"workout",   label:"Tập luyện", icon:"dumbbell" },
+  { view:"nutrition", label:"Dinh dưỡng", icon:"nutrition" },
+  { view:"progress",  label:"Tiến độ", icon:"chart" }
+];
+const VIEW_TITLES = {
+  dashboard:["Dashboard","Tổng quan hôm nay"],
+  program:["Giáo trình 12 tuần","4 giai đoạn · 12 tuần"],
+  workout:["Tập luyện","Buổi tập · thư viện bài · cardio"],
+  nutrition:["Dinh dưỡng","Mục tiêu · bữa ăn · ngân sách"],
+  progress:["Tiến độ","Cân nặng · eo · bước chân"],
+  settings:["Cài đặt","Hồ sơ · dữ liệu · giao diện"],
+  exercise:["Chi tiết bài tập",""]
+};
+let currentView = "dashboard";
+let currentParams = {};
+
+function navTo(view, params){
+  params = params||{};
+  const hash = params.id ? "#"+view+"/"+params.id : "#"+view;
+  if(location.hash === hash){ render(); } else { location.hash = hash; }
+}
+function parseHash(){
+  const h = (location.hash||"#dashboard").slice(1);
+  const parts = h.split("/");
+  const v = parts[0] || "dashboard";
+  if(NAVS.some(n=>n.view===v) || v==="settings" || v==="exercise") return { view:v, id:parts[1]||null };
+  return { view:"dashboard", id:null };
+}
+function renderNav(){
+  $("#sideNav").innerHTML = NAVS.map(n=>
+    '<button class="nav-item'+(currentView===n.view?" active":"")+'" data-action="nav" data-view="'+n.view+'">'+Icon(n.icon)+n.label+'</button>'
+  ).join("");
+  $("#sideSettings").className = "nav-item"+(currentView==="settings"?" active":"");
+  $("#sideSettings").querySelector(".ni-ic").innerHTML = Icon("settings");
+  $("#bnInner").innerHTML = NAVS.map(n=>
+    '<button class="bn-btn'+(currentView===n.view?" active":"")+'" data-action="nav" data-view="'+n.view+'" aria-label="'+n.label+'">'+Icon(n.icon,22)+'<span>'+n.label+'</span></button>'
+  ).join("");
+}
+function renderWeekPill(){
+  const s = stats();
+  $("#sideWeekPill").innerHTML =
+    '<div class="wp-big">Tuần '+s.week+' / 12</div>'
+    + '<div class="wp-small">'+s.pct+'% chương trình</div>'
+    + '<div class="wp-bar"><i style="width:'+s.pct+'%"></i></div>';
+}
+function viewHeader(title, sub, extra){
+  return '<div class="view-head"><div class="view-head-row"><div>'
+    + '<h1>'+esc(title)+'</h1>'+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+'</div>'
+    + '<div class="row">'+(extra||"")+'</div></div></div>';
+}
+function render(){
+  currentParams = parseHash();
+  currentView = currentParams.view;
+  stopAllFigs();
+  const v = $("#view");
+  v.scrollTop = 0; window.scrollTo(0,0);
+  switch(currentView){
+    case "dashboard": v.innerHTML = renderDashboard(); break;
+    case "program":   v.innerHTML = renderProgram(); break;
+    case "workout":   v.innerHTML = renderWorkoutHub(); break;
+    case "nutrition": v.innerHTML = renderNutrition(); break;
+    case "progress":  v.innerHTML = renderProgress(); break;
+    case "settings":  v.innerHTML = renderSettings(); break;
+    case "exercise":  v.innerHTML = renderExerciseDetail(currentParams.id); break;
+    default: v.innerHTML = renderDashboard();
+  }
+  renderNav(); renderWeekPill();
+  if(currentView==="progress") drawAllCharts();
+  if(currentView==="dashboard") drawSparkline();
+}
+
+/* ============================================================
+   SHARED BUILDERS
+   ============================================================ */
+function schedIconFor(t){ return t==="strength" ? Icon("dumbbell") : (t==="cardio"? Icon("walk") : (t==="recovery"? Icon("recovery") : Icon("zzz"))); }
+function schedClassFor(t){ return "si-"+t; }
+function schedBadgeFor(t){
+  return {strength:'<span class="badge b-strength">Strength</span>',
+          cardio:'<span class="badge b-cardio">Cardio</span>',
+          recovery:'<span class="badge b-recovery">Recovery</span>',
+          rest:'<span class="badge b-rest">Nghỉ</span>'}[t]||"";
+}
+function workoutDoneOn(dateISO, woKey){ return workoutsOn(dateISO).some(w=>w.wo===woKey); }
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function greeting(){
+  const h = new Date().getHours();
+  if(h<11) return "Chào buổi sáng";
+  if(h<14) return "Chào buổi trưa";
+  if(h<18) return "Chào buổi chiều";
+  return "Chào buổi tối";
+}
+function renderDashboard(){
+  const s = stats();
+  const wk = s.week;
+  const now = new Date();
+  const tk = todayKey(now);
+  const sched = scheduleFor(tk);
+  const done = dayCompletedType(tk);
+
+  /* today hero */
+  let hero;
+  if(sched.type==="strength"){
+    const wo = WORKOUTS[sched.wo];
+    const isDone = workoutDoneOn(tk, sched.wo);
+    hero = '<section class="hero" aria-label="Buổi tập hôm nay">'
+      + '<div class="h-eyebrow">Hôm nay · '+DOW_FULL[now.getDay()]+'</div>'
+      + '<h2>BUỔI '+sched.wo+' — '+wo.title.toUpperCase()+'</h2>'
+      + '<div class="h-meta">'
+      + '<span class="h-chip">'+Icon("timer",14)+wo.mins+' phút</span>'
+      + '<span class="h-chip">'+Icon("dumbbell",14)+wo.exList.length+' bài tập</span>'
+      + (isDone? '<span class="h-chip">'+Icon("check",14)+'Đã hoàn thành</span>' : '')
+      + '</div>'
+      + '<div class="h-list">'+wo.exList.map(id=>'<span>'+Icon("check",14)+esc(findEx(id).name)+'</span>').join("")+'</div>'
+      + '<button class="btn btn-white btn-lg" data-action="start-workout" data-wo="'+sched.wo+'" data-date="'+tk+'">'+Icon("play",18)+'BẮT ĐẦU TẬP</button>'
+      + '</section>';
+  } else if(sched.type==="rest"){
+    hero = '<section class="hero h-rest" aria-label="Ngày nghỉ">'
+      + '<div class="h-eyebrow">Hôm nay · '+DOW_FULL[now.getDay()]+'</div>'
+      + '<h2>RECOVERY DAY</h2>'
+      + '<div class="h-list">'
+      + '<span>'+Icon("walk",16)+'Đi bộ nhẹ nếu thấy thoải mái</span>'
+      + '<span>'+Icon("recovery",16)+'Mobility / giãn cơ nhẹ</span>'
+      + '<span>'+Icon("water",16)+'Uống đủ 2–2.5L nước</span>'
+      + '<span>'+Icon("zzz",16)+'Ngủ đủ 7–9 tiếng</span>'
+      + '</div></section>';
+  } else {
+    const isDone = state.cardio.some(c=>c.date===tk) || done;
+    hero = '<section class="hero" aria-label="Cardio hôm nay">'
+      + '<div class="h-eyebrow">Hôm nay · '+DOW_FULL[now.getDay()]+'</div>'
+      + '<h2>'+sched.label.toUpperCase()+'</h2>'
+      + '<div class="h-meta"><span class="h-chip">'+Icon("timer",14)+sched.sub+'</span>'
+      + (isDone? '<span class="h-chip">'+Icon("check",14)+'Đã xong</span>':'')+'</div>'
+      + '<div class="h-list">'
+      + '<span>'+Icon("info",16)+'Cường độ 5–6/10 — “vẫn nói được thành câu”</span>'
+      + '<span>'+Icon("steps",16)+'Tiến dần tới 8.000–10.000 bước/ngày</span>'
+      + '</div>'
+      + '<button class="btn btn-white btn-lg" data-action="nav" data-view="workout">'+Icon("play",18)+'MỞ TRANG TẬP LUYỆN</button>'
+      + '</section>';
+  }
+
+  /* quick stats */
+  const w = latestWeight();
+  const stepsToday = state.steps[tk]||0;
+  const stepTarget = 8000;
+  const quick = '<div class="grid g4 mt20">'
+    + '<div class="card stat-card"><div class="stat-icon">'+Icon("dumbbell")+'</div><div><div class="stat-val">'+s.workoutsThisWeek+' / 3</div><div class="stat-label">Workout tuần này</div></div></div>'
+    + '<div class="card stat-card"><div class="stat-icon amber">'+Icon("steps")+'</div><div><div class="stat-val">'+fmtNum(stepsToday)+'</div><div class="stat-label">Bước chân hôm nay / '+fmtNum(stepTarget)+'</div></div></div>'
+    + '<div class="card stat-card"><div class="stat-icon green">'+Icon("scale")+'</div><div><div class="stat-val">'+(w!=null? w.toFixed(1)+" kg" : "—")+'</div><div class="stat-label">Cân nặng hiện tại</div></div></div>'
+    + '<div class="card stat-card"><div class="stat-icon">'+Icon("target")+'</div><div><div class="stat-val">'+s.adherence+'%</div><div class="stat-label">Tuân thủ chương trình</div></div></div>'
+    + '</div>';
+
+  /* week calendar */
+  const mon = startOfWeek(now);
+  let cal = '<div class="cal-strip">';
+  for(let i=0;i<7;i++){
+    const d = new Date(mon); d.setDate(mon.getDate()+i);
+    const dISO = todayKey(d);
+    const sch = SCHEDULE[d.getDay()];
+    const isToday = dISO===tk;
+    const doneType = dayCompletedType(dISO);
+    cal += '<button class="cal-day'+(isToday?" today":"")+(doneType?" done":"")+'" data-action="day-detail" data-date="'+dISO+'" aria-label="'+DOW_FULL[d.getDay()]+'">'
+      + '<span class="cd-dow">'+DOW[d.getDay()]+'</span>'
+      + '<span class="cd-num">'+d.getDate()+'</span>'
+      + '<span class="cd-type t-'+sch.type+'"></span>'
+      + (doneType? '<span style="color:var(--success)">'+Icon("check",13)+'</span>' : '<span style="height:17px"></span>')
+      + '</button>';
+  }
+  cal += '</div>'
+    + '<div class="cal-legend">'
+    + '<span><i class="t-strength"></i>Strength</span><span><i class="t-cardio"></i>Cardio</span>'
+    + '<span><i class="t-recovery"></i>Recovery</span><span><i class="t-rest"></i>Nghỉ</span><span><i style="background:var(--success)"></i>Hoàn thành</span>'
+    + '</div>';
+
+  /* habits */
+  const habitsDef = [
+    ["water","Uống ≥2L nước","water"],
+    ["protein","Protein ≥95g","nutrition"],
+    ["steps","≥8.000 bước","steps"],
+    ["workout","Workout / Cardio","dumbbell"],
+    ["sleep","Ngủ ≥7h","zzz"]
+  ];
+  const hToday = state.habits[tk]||{};
+  const hDone = habitsDef.filter(h=>hToday[h[0]]).length;
+  let habits = '<div class="card"><div class="row-between" style="margin-bottom:6px"><div class="card-title">'+Icon("check",18)+'Thói quen hôm nay</div>'
+    + '<span class="badge '+(hDone===5?"b-done":"b-info")+'">'+hDone+'/5</span></div>';
+  habits += habitsDef.map(h=>
+    '<div class="habit-row'+(hToday[h[0]]?" on":"")+'" data-action="habit" data-key="'+h[0]+'" role="checkbox" aria-checked="'+(!!hToday[h[0]])+'" tabindex="0">'
+    + '<span class="habit-box">'+Icon("check",14)+'</span><span class="h-label">'+h[1]+'</span>'+Icon(h[2],17)
+    + '</div>').join("") + '</div>';
+
+  /* sparkline + tip */
+  const spark = '<div class="card chart-card"><div class="row-between"><div class="card-title">'+Icon("scale",18)+'Xu hướng cân nặng</div>'
+    + '<button class="btn btn-sm btn-ghost" data-action="nav" data-view="progress">Chi tiết '+Icon("chevronR",13)+'</button></div>'
+    + '<canvas id="sparkCanvas" height="200" aria-label="Biểu đồ cân nặng"></canvas>'
+    + '<div class="tiny muted mt8">'+weightTrendText()+'</div></div>';
+
+  return viewHeader(greeting()+" 👋", "Tuần "+wk+" / 12 · "+fmtDateVN(tk), '')
+    + hero
+    + quick
+    + '<div class="grid g2 mt20">'
+    + '<div class="card"><div class="card-title">'+Icon("calendar",18)+'Tuần này</div><div class="mt14">'+cal+'</div></div>'
+    + habits
+    + '</div>'
+    + '<div class="grid g2 mt16">' + spark + adjustmentCard() + '</div>'
+    + '<div class="card mt16">'+glossaryHTML()+'</div>';
+}
+function weightTrendText(){
+  const n = state.bodyWeight.length;
+  if(n<2) return "Cân 3 lần/tuần (buổi sáng) — app sẽ tự tính trung bình tuần để đánh giá xu hướng.";
+  const a = weeklyAvgWeight(currentProgramWeek());
+  const b = weeklyAvgWeight(currentProgramWeek()-1);
+  if(a==null||b==null) return "Thêm lần cân để thấy xu hướng trung bình tuần.";
+  const d = a-b;
+  if(Math.abs(d)<0.15) return "Trung bình tuần gần như không đổi ("+(d>0?"+":"")+d.toFixed(2)+" kg).";
+  return "Trung bình tuần "+(d<0?"giảm":"tăng")+" "+Math.abs(d).toFixed(2)+" kg so với tuần trước.";
+}
+function glossaryHTML(){
+  return '<div class="glossary"><b>RIR — Reps In Reserve:</b> số rep bạn cảm thấy vẫn còn làm thêm được với form tốt. '
+    + 'Ví dụ RIR 2 = còn “dư” khoảng 2 rep. <b>Progressive overload:</b> tăng dần thử thách bằng rep, mức tạ hoặc chất lượng chuyển động.</div>';
+}
+
+/* ============================================================
+   PROGRAM PAGE
+   ============================================================ */
+function renderProgram(){
+  const wk = currentProgramWeek();
+  const phases = '<div class="phase-grid">'+PHASES.map(ph=>{
+    const cur = wk>=ph.weeks[0]&&wk<=ph.weeks[1];
+    return '<div class="phase-card'+(cur?" current":"")+'">'
+      + (cur? '<span class="pc-tag badge b-info">Đang ở đây</span>':'')
+      + '<div class="pc-num">'+ph.num+'</div><h3>'+ph.name+'</h3><div class="pc-weeks">'+ph.tag+'</div>'
+      + '<ul>'+ph.points.map(p=>"<li>"+p+"</li>").join("")+'</ul></div>';
+  }).join("")+'</div>';
+
+  const weekCards = '<div class="weeks-grid mt14">'+Array.from({length:12},(_,i)=>{
+    const w = i+1;
+    const r = weekRange(w);
+    const plan = 3;
+    const doneW = state.workouts.filter(x=> weekRange(weekOfDate(x.date)).start===r.start && weekOfDate(x.date)===w ).length;
+    const isCur = w===wk;
+    const locked = false; // mọi tuần đều xem được
+    const dots = [1,2,3].map(n=>{
+      const dotDone = doneW>=n;
+      return '<span class="wc-dot'+(dotDone?" done":"")+(isCur?" today":"")+'">'+(dotDone?"✓":n)+'</span>';
+    }).join("");
+    return '<button class="week-card'+(isCur?" current":"")+(locked?" locked":"")+'" data-action="week-detail" data-week="'+w+'">'
+      + '<span class="wc-head"><span class="wc-title">Week '+w+'</span>'
+      + '<span class="wc-pct">'+Math.min(100,Math.round(doneW/plan*100))+'%</span></span>'
+      + '<div class="bar thin"><i style="width:'+Math.min(100,doneW/plan*100)+'%"></i></div>'
+      + '<span class="wc-dots">'+dots+'</span>'
+      + (r.start? '<div class="tiny muted mt8">'+fmtDateVN(r.start)+' → '+fmtDateVN(r.end)+'</div>':'')
+      + '</button>';
+  }).join("")+'</div>';
+
+  return viewHeader("Giáo trình 12 tuần","Giảm mỡ · Giữ cơ · Săn chắc — theo PDF gốc",'')
+    + '<div class="section-title">'+Icon("flag",20)+'4 giai đoạn</div>' + phases
+    + '<div class="section-title">'+Icon("calendar",20)+'12 tuần</div>' + weekCards
+    + '<div class="card mt20"><div class="card-title">'+Icon("book",18)+'Nguyên tắc cốt lõi</div>'
+    + '<div class="grid g2 mt14">'
+    + '<div class="glossary"><b>Kỹ thuật &gt; mức tạ.</b> Kết thúc set khi còn khoảng 2 rep dự trữ (RIR ~2). Không cần tập đến kiệt sức.</div>'
+    + '<div class="glossary"><b>Ví dụ tăng tiến Goblet Squat:</b> 8 kg × 10/10/10 → 11/11/10 → 12/12/12 → tăng lên 10 kg và quay lại ~9–10 rep.</div>'
+    + '</div></div>'
+    + weeklyReviewCard();
+}
+function weeklyReviewCard(){
+  const wk = currentProgramWeek();
+  const done = state.reviews[wk];
+  if(done && done.completed) return '<div class="card mt20"><div class="row-between"><div class="card-title" style="color:var(--success)">'+Icon("check",18)+'Week '+wk+' review — đã hoàn thành</div>'
+    + '<button class="btn btn-sm btn-outline" data-action="open-review" data-week="'+wk+'">Xem lại</button></div>'
+    + '<p class="small muted mt8">'+esc(done.notes||"Không có ghi chú.")+'</p></div>';
+  const isEndOfWeek = true; // luôn cho review
+  return '<div class="card mt20"><div class="row-between"><div class="card-title">'+Icon("note",18)+'Week '+wk+' review</div>'
+    + '<span class="badge b-info">Cuối tuần</span></div>'
+    + '<p class="small muted mt8">Điểm lại tuần: số buổi tập, bước chân, cân trung bình, protein &amp; nước.</p>'
+    + '<button class="btn btn-primary mt14" data-action="open-review" data-week="'+wk+'">'+Icon("note",16)+'MỞ REVIEW TUẦN '+wk+'</button></div>';
+}
+
+/* week detail modal */
+function openWeekDetail(week){
+  const r = weekRange(week);
+  const monday = r.start? parseISO(r.start) : startOfWeek(new Date());
+  let sched = "";
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const dISO = todayKey(d);
+    const sch = SCHEDULE[d.getDay()];
+    const doneT = dayCompletedType(dISO);
+    sched += '<div class="sched-item'+(dISO===todayKey()?" today":"")+'">'
+      + '<div class="sched-icon '+schedClassFor(sch.type)+'">'+schedIconFor(sch.type)+'</div>'
+      + '<div class="sched-main"><div class="sched-title">'+DOW_FULL[d.getDay()]+' — '+sch.label+'</div><div class="sched-sub">'+sch.sub+'</div></div>'
+      + (doneT? '<span class="badge b-done">'+Icon("check",12)+'Xong</span>'
+              : '<button class="btn btn-sm btn-outline" data-action="start-scheduled" data-date="'+dISO+'">Bắt đầu</button>')
+      + '</div>';
+  }
+  const aw = weeklyAvgWeight(week), as = weeklyAvgSteps(week);
+  openModal(
+    '<div class="modal-head"><h3>Week '+week+'</h3><button class="icon-btn" data-action="close-modal" aria-label="Đóng">'+Icon("x",18)+'</button></div>'
+    + (r.start? '<p class="small muted">'+fmtDateVN(r.start)+' → '+fmtDateVN(r.end)+'</p>':'<p class="small muted">Chọn ngày bắt đầu trong Cài đặt để nhận lịch theo ngày.</p>')
+    + '<div class="mt14">'+sched+'</div>'
+    + '<div class="grid g3 mt14">'
+    + '<div class="sum-stat"><b>'+(aw!=null? aw.toFixed(1)+" kg":"—")+'</b><span>Cân TB tuần</span></div>'
+    + '<div class="sum-stat"><b>'+(as!=null? fmtNum(Math.round(as)):"—")+'</b><span>Bước TB/ngày</span></div>'
+    + '<div class="sum-stat"><b>'+state.workouts.filter(x=>weekOfDate(x.date)===week).length+'/3</b><span>Workout</span></div>'
+    + '</div>'
+    + '<div class="modal-actions"><button class="btn btn-outline" data-action="close-modal">Đóng</button></div>'
+  );
+}
+
+/* day detail modal */
+function openDayDetail(dateISO){
+  const sch = scheduleFor(dateISO);
+  const d = parseISO(dateISO);
+  let body = "";
+  if(sch.type==="strength"){
+    const wo = WORKOUTS[sch.wo];
+    body = '<div class="hero" style="padding:20px"><div class="h-eyebrow">'+DOW_FULL[d.getDay()]+'</div><h2 style="font-size:20px">BUỔI '+sch.wo+' — '+wo.title.toUpperCase()+'</h2>'
+      + '<div class="h-meta"><span class="h-chip">'+Icon("timer",14)+wo.mins+' phút</span><span class="h-chip">'+Icon("dumbbell",14)+wo.exList.length+' bài</span></div>'
+      + '<button class="btn btn-white" data-action="start-workout" data-wo="'+sch.wo+'" data-date="'+dateISO+'">'+Icon("play",16)+'BẮT ĐẦU TẬP</button></div>'
+      + '<div class="mt14">'+wo.exList.map(id=>{ const e=findEx(id); return '<div class="sched-item"><div class="sched-icon si-strength">'+Icon("dumbbell")+'</div>'
+        + '<div class="sched-main"><div class="sched-title">'+esc(e.name)+'</div><div class="sched-sub">'+e.sets+' × '+e.reps+' · nghỉ '+e.rest+'s</div></div>'
+        + '<button class="btn btn-sm btn-ghost" data-action="open-exercise" data-id="'+id+'">Xem '+Icon("chevronR",13)+'</button></div>'; }).join("")+'</div>';
+  } else {
+    body = '<div class="hero'+(sch.type==="rest"?" h-rest":"")+'" style="padding:20px"><div class="h-eyebrow">'+DOW_FULL[d.getDay()]+'</div>'
+      + '<h2 style="font-size:20px">'+sch.label.toUpperCase()+'</h2><div class="h-meta"><span class="h-chip">'+Icon("timer",14)+sch.sub+'</span></div>'
+      + (sch.type==="rest"? '' : '<button class="btn btn-white" data-action="nav-cardio">'+Icon("play",16)+'MỞ CARDIO</button>')
+      + '<div class="mt14"><button class="link" data-action="nutrition-open">Xem gợi ý dinh dưỡng trong Dinh dưỡng →</button></div>'
+      + '</div>'
+      + (sch.type==="rest"? '<p class="small muted mt14">Ngày nghỉ hoàn toàn: ưu tiên ngủ, nước và phục hồi. Đi bộ nhẹ vẫn rất tốt nếu bạn muốn.</p>' : '');
+  }
+  openModal('<div class="modal-head"><h3>'+fmtDateVN(dateISO)+'</h3><button class="icon-btn" data-action="close-modal" aria-label="Đóng">'+Icon("x",18)+'</button></div>'+body
+    + '<div class="modal-actions"><button class="btn btn-outline" data-action="close-modal">Đóng</button></div>');
+}
+
+/* ============================================================
+   WORKOUT HUB (view "workout")
+   ============================================================ */
+function renderWorkoutHub(){
+  const tk = todayKey();
+  const sched = scheduleFor(tk);
+  const wk = currentProgramWeek();
+
+  const todayCard = '<div class="card pad-lg">'
+    + '<div class="eyebrow">Hôm nay · '+DOW_FULL[new Date().getDay()]+'</div>'
+    + '<h2 style="font-size:22px;margin-top:6px">'+sched.label.toUpperCase()+'</h2>'
+    + '<div class="row wrap mt8"><span class="badge '+(sched.type==="strength"?"b-strength":sched.type==="cardio"?"b-cardio":"b-recovery")+'">'+schedBadgeFor(sched.type)+'</span>'
+    + '<span class="small muted">'+sched.sub+'</span></div>'
+    + '<div class="row wrap mt16">'
+    + (sched.type==="strength"? '<button class="btn btn-primary btn-lg" data-action="start-workout" data-wo="'+sched.wo+'" data-date="'+tk+'">'+Icon("play",18)+'BẮT ĐẦU TẬP</button>' : '')
+    + '<button class="btn btn-outline btn-lg" data-action="nav-cardio">'+Icon("walk",18)+'CARDIO</button>'
+    + '</div></div>';
+
+  const weekPlan = '<div class="card"><div class="card-title">'+Icon("calendar",18)+'Lịch tuần '+wk+'</div><div class="mt14">'
+    + [1,2,3,4,5,6,0].map(dow=>{
+        const sch2 = SCHEDULE[dow];
+        return '<div class="sched-item"><div class="sched-icon '+schedClassFor(sch2.type)+'">'+schedIconFor(sch2.type)+'</div>'
+          + '<div class="sched-main"><div class="sched-title">'+DOW_FULL[dow]+'</div><div class="sched-sub">'+sch2.label+' · '+sch2.sub+'</div></div>'
+          + (sch2.wo? '<button class="btn btn-sm btn-outline" data-action="start-workout" data-wo="'+sch2.wo+'" data-date="'+tk+'">Tập</button>':'')
+          + '</div>';
+      }).join("") + '</div></div>';
+
+  const quickStart = '<div class="card"><div class="card-title">'+Icon("play",18)+'Bắt đầu nhanh</div>'
+    + '<p class="small muted mt8">Chọn buổi bạn muốn tập hôm nay (không nhất thiết đúng lịch).</p>'
+    + '<div class="stack mt14">'
+    + ["A","B","C"].map(k=>'<button class="btn btn-outline btn-block" data-action="start-workout" data-wo="'+k+'" data-date="'+tk+'">'
+        + Icon("dumbbell",17)+WORKOUTS[k].full+' · '+WORKOUTS[k].mins+'′</button>').join("")
+    + '</div></div>';
+
+  const history = state.workouts.length
+    ? '<div class="card"><div class="card-title">'+Icon("timer",18)+'Lịch sử tập</div><div class="mt14" style="max-height:340px;overflow-y:auto">'
+      + state.workouts.slice().reverse().slice(0,20).map(w=>{
+          const ex = findEx(w.exList[w.exIdx]||"") || null;
+          return '<div class="sched-item"><div class="sched-icon si-strength">'+Icon("dumbbell")+'</div>'
+            + '<div class="sched-main"><div class="sched-title">Buổi '+w.wo+' — '+fmtDateVN(w.date)+'</div>'
+            + '<div class="sched-sub">'+w.setsDone+' sets · '+Math.floor(w.duration/60)+' phút'+(w.feel? ' · cảm giác: '+w.feel : '')+'</div></div>'
+            + '<button class="btn btn-sm btn-ghost" data-action="view-workout" data-id="'+w.id+'">Xem</button></div>';
+        }).join("") + '</div></div>'
+    : '<div class="empty"><div class="e-icon">'+Icon("dumbbell",24)+'</div><b>Buổi tập đầu tiên đang chờ bạn.</b><p>Hoàn thành buổi đầu để bắt đầu theo dõi tiến độ 12 tuần.</p>'
+      + '<button class="btn btn-primary" data-action="start-workout" data-wo="'+(sched.wo||"A")+'" data-date="'+tk+'">'+Icon("play",16)+'START WORKOUT</button></div>';
+
+  const cardioCard = cardioCardHTML();
+
+  return viewHeader("Tập luyện","Workout engine · cardio · lịch sử",'')
+    + '<div class="grid g2">'+todayCard+quickStart+'</div>'
+    + '<div class="grid g2 mt16">'+weekPlan+cardioCard+'</div>'
+    + '<div class="mt16">'+history+'</div>'
+    + '<div class="mt16">'+renderWorkoutLibrary()+'</div>';
+}
+function cardioCardHTML(){
+  const tk = todayKey();
+  return '<div class="card"><div class="card-title">'+Icon("walk",18)+'Cardio &amp; đi bộ</div>'
+    + '<ul class="meal-items mt8">'
+    + '<li>1–2 buổi/tuần · 30–45 phút · cường độ 5–6/10</li>'
+    + '<li>Talk test: “Thở nhanh hơn bình thường nhưng vẫn nói được thành câu.”</li>'
+    + '<li>Lựa chọn: đi bộ nhanh, máy chạy, xe đạp, elliptical, bơi</li>'
+    + '<li>Máy chạy: tốc độ 4,5–5,5 km/h · dốc 3–8% (tùy sức, không bắt buộc)</li>'
+    + '</ul>'
+    + '<div class="row wrap mt14"><button class="btn btn-primary" data-action="nav-cardio">'+Icon("play",16)+'BẮT ĐẦU CARDIO</button>'
+    + '<div class="input-wrap" style="width:170px"><input class="input" type="number" inputmode="numeric" min="0" max="60000" step="100" placeholder="8.000" id="quickSteps" aria-label="Bước chân hôm nay"><span class="unit-suffix">bước</span></div>'
+    + '<button class="btn btn-outline" data-action="save-steps">Lưu bước</button></div></div>';
+}
+
+/* ============================================================
+   CARDIO MODE
+   ============================================================ */
+const CARDIO_TYPES = [
+  ["walking","Đi bộ nhanh","walk"],["treadmill","Máy chạy bộ","gym"],
+  ["cycling","Xe đạp","bike"],["elliptical","Elliptical","recovery"],["swimming","Bơi","swim"]
+];
+function openCardio(){
+  const wo = $("#wodOverlay");
+  wo.innerHTML = '<div class="wod-head">'
+    + '<button class="icon-btn" data-action="exit-workout" aria-label="Thoát">'+Icon("chevronL",20)+'</button>'
+    + '<div style="flex:1"><b>Cardio</b><div class="tiny muted">Cường độ 5–6/10 · talk test</div></div>'
+    + '<span class="wod-timer" id="cardioTimer">'+fmtClock(cardioState.elapsed)+'</span>'
+    + '<button class="icon-btn" data-action="cardio-toggle" aria-label="Bắt đầu hoặc tạm dừng">'+Icon(cardioState.running?"pause":"play",18)+'</button>'
+    + '</div>'
+    + '<div class="wod-body"><div class="wod-body-inner">'
+    + '<div class="card"><div class="card-title">'+Icon("info",18)+'Gợi ý</div>'
+    + '<ul class="meal-items mt8"><li>30–45 phút — có thể ngắn hơn nếu mới bắt đầu</li>'
+    + '<li>Thở nhanh hơn nhưng vẫn nói được thành câu</li>'
+    + '<li>Máy chạy: 4,5–5,5 km/h, dốc 3–8% — không bắt buộc</li></ul></div>'
+    + '<div class="card mt16"><div class="card-title">'+Icon("walk",18)+'Loại hình</div>'
+    + '<div class="chips mt14" id="cardioTypes">'+CARDIO_TYPES.map(c=>'<button class="chip'+(cardioState.type===c[0]?" active":"")+'" data-action="cardio-type" data-type="'+c[0]+'">'+c[1]+'</button>').join("")+'</div>'
+    + '<div class="grid g2 mt16">'
+    + '<label class="field">Thời lượng (phút)<input class="input" type="number" min="1" max="180" id="cardioDuration" value="'+Math.round(cardioState.elapsed/60||30)+'"></label>'
+    + '<label class="field">Quãng đường (km, tùy chọn)<input class="input" type="number" min="0" step="0.1" id="cardioDistance" placeholder="Ví dụ: 3.5"></label>'
+    + '</div>'
+    + '<label class="field mt14">Cảm giác nỗ lực (1–10)<select class="select" id="cardioEffort">'
+    + [3,4,5,6,7,8].map(n=>'<option value="'+n+'"'+(n===6?" selected":"")+'>'+n+' / 10</option>').join("")+'</select></label>'
+    + '<label class="field mt14">Ghi chú<textarea class="input" id="cardioNotes" placeholder="Ví dụ: đi bộ công viên, dốc 4%..."></textarea></label>'
+    + '<button class="btn btn-primary btn-lg btn-block mt14" data-action="cardio-save">'+Icon("check",18)+'LƯU BUỔI CARDIO</button>'
+    + '</div></div></div>';
+  wo.classList.add("open");
+  document.body.style.overflow = "hidden";
+  renderCardioTimer();
+}
+let cardioState = { running:false, elapsed:0, type:"walking", tick:null, startedAt:null };
+function renderCardioTimer(){
+  const el = $("#cardioTimer"); if(el) el.textContent = fmtClock(cardioState.elapsed);
+}
+function cardioToggle(){
+  if(cardioState.running){
+    clearInterval(cardioState.tick); cardioState.running = false;
+  } else {
+    cardioState.running = true;
+    cardioState.tick = setInterval(()=>{ cardioState.elapsed++; renderCardioTimer(); }, 1000);
+  }
+  const b = document.querySelector('[data-action="cardio-toggle"]'); if(b) b.innerHTML = Icon(cardioState.running?"pause":"play",18);
+}
+function cardioSave(){
+  const dur = Math.round(cardioState.elapsed/60) || parseInt(($("#cardioDuration")||{}).value||"30",10);
+  const dist = parseFloat((($("#cardioDistance")||{}).value||""));
+  const eff = parseInt((($("#cardioEffort")||{}).value||"6"),10);
+  const notes = (($("#cardioNotes")||{}).value||"").trim();
+  state.cardio.push({ date:todayKey(), type:cardioState.type, duration:Math.max(1,dur), distance:isNaN(dist)?null:dist, effort:eff, notes });
+  const stepsHabit = (state.habits[todayKey()]||{}); stepsHabit.workout = 1; state.habits[todayKey()] = stepsHabit;
+  saveState();
+  clearInterval(cardioState.tick);
+  exitWorkoutMode();
+  toast("Đã lưu buổi cardio ✓","check");
+  render();
+}
+function exitCardio(){
+  clearInterval(cardioState.tick);
+  cardioState = { running:false, elapsed:0, type:"walking", tick:null };
+  exitWorkoutMode();
+}
+
+/* ============================================================
+   WORKOUT ENGINE
+   ============================================================ */
+let WOD = null;          // active workout session
+let wodTimer = null;     // interval
+const PHASE_WO = w => (w<=2 ? 2 : 3); // sets per exercise by week (week 9-12: 3-4 for main)
+
+function startWorkout(woKey, dateISO){
+  const wo = WORKOUTS[woKey];
+  if(!wo) return;
+  const setsByEx = {};
+  wo.exList.forEach(id=>{
+    const ex = findEx(id);
+    let n = ex.sets;
+    const wk = currentProgramWeek();
+    if(wk<=2) n = Math.min(n,2);
+    if(wk>=9 && !ex.core && (id==="goblet-squat"||id==="hip-thrust"||id==="romanian-deadlift")) n = Math.min(4, n+1);
+    setsByEx[id] = n;
+  });
+  WOD = {
+    id:"w"+Date.now(), wo:woKey, date:dateISO||todayKey(),
+    exList: wo.exList.slice(), exIdx:0,
+    sets: setsByEx,          // {exId: totalSets}
+    logs:{},                 // {exId: [{kg,reps,rir,done}]}
+    setsDone:0, totalSets:0,
+    startedAt: Date.now(), elapsed:0, paused:false,
+    step:"warmup", feel:"", notes:""
+  };
+  WOD.totalSets = Object.values(WOD.sets).reduce((a,b)=>a+b,0);
+  openWorkoutMode();
+  renderWarmup();
+}
+function openWorkoutMode(){
+  $("#wodOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+  wodTimer = setInterval(()=>{
+    if(WOD && !WOD.paused && WOD.step!=="summary"){ WOD.elapsed++; updateWodTimer(); }
+  },1000);
+  updateWodTimer();
+}
+function exitWorkoutMode(){
+  $("#wodOverlay").classList.remove("open");
+  $("#wodOverlay").innerHTML = "";
+  document.body.style.overflow = "";
+  clearInterval(wodTimer); wodTimer = null;
+  WOD = null;
+  stopAllFigs();
+}
+function updateWodTimer(){
+  const el = $("#wodTimerMain"); if(el && WOD) el.textContent = fmtClock(WOD.elapsed);
+}
+function renderWodHeader(){
+  const wo = WORKOUTS[WOD.wo];
+  const doneEx = WOD.exIdx + (WOD.step==="exercise"?0:1);
+  const total = WOD.exList.length;
+  return '<div class="wod-head">'
+    + '<button class="icon-btn" data-action="confirm-exit" aria-label="Thoát buổi tập">'+Icon("chevronL",20)+'</button>'
+    + '<div style="flex:1;min-width:0"><b>'+esc(wo.full)+'</b><div class="tiny muted">'+fmtDateVN(WOD.date)+'</div></div>'
+    + '<span class="wod-timer">'+Icon("timer",15)+'<span id="wodTimerMain">'+fmtClock(WOD.elapsed)+'</span></span>'
+    + '<button class="icon-btn" data-action="pause-workout" aria-label="Tạm dừng">'+Icon(WOD.paused?"play":"pause",18)+'</button>'
+    + '</div>'
+    + '<div style="padding:10px 18px 0"><div class="wod-progress" style="height:6px;border-radius:99px;background:var(--surface3);overflow:hidden"><i style="width:'+Math.round(doneEx/total*100)+'%;display:block;height:100%;background:var(--primary)"></i></div>'
+    + '<div class="tiny muted" style="margin-top:5px">'+(WOD.step==="warmup"? 'Bước 1 — Khởi động' : 'Exercise '+Math.min(WOD.exIdx+1, total)+' / '+total)+'</div></div>';
+}
+function renderWarmup(){
+  const items = ["3–5 phút đi bộ nhanh / đạp xe","10 bodyweight squat","10 hip hinge","10 vòng vai mỗi hướng","1–2 set khởi động nhẹ của bài đầu tiên"];
+  $("#wodOverlay").innerHTML = renderWodHeader()
+    + '<div class="wod-body"><div class="wod-body-inner">'
+    + '<div class="card pad-lg"><div class="eyebrow">Bước 1</div><h2 style="font-size:22px;margin-top:6px">Khởi động 5–8 phút</h2>'
+    + '<ul class="steps-list mt14" style="counter-reset:st 0">'+items.map(i=>'<li>'+i+'</li>').join("")+'</ul>'
+    + '<div class="safety-card mt14">'+Icon("info",20)+'<div>Đau cơ/mỏi cơ khác với <b>đau nhói ở khớp</b>. Nếu đau nhói, tê, chóng mặt hoặc đau tăng dần — dừng bài tập đó, không cố hoàn thành set.</div></div>'
+    + '<button class="btn btn-primary btn-lg btn-block mt20" data-action="warmup-done">'+Icon("check",18)+'WARM-UP COMPLETE</button>'
+    + '</div></div></div>';
+}
+function lastTimeFor(exId){
+  const past = state.workouts.filter(w=> w.exList.includes(exId)).slice(-3).reverse();
+  for(const w of past){
+    const logs = w.logs && w.logs[exId];
+    if(logs && logs.some(l=>l.done)){
+      const isTime = findEx(exId).timebased;
+      return { date:w.date, sets: logs.filter(l=>l.done).map(l=> (l.kg!=null? l.kg+" kg":(isTime?"bw":"bw"))+" × "+(isTime? (l.reps!=null? l.reps+"s":"—") : (l.reps!=null?l.reps:"—")) ) };
+    }
+  }
+  return null;
+}
+function suggestionFor(exId, logs){
+  const ex = findEx(exId);
+  if(ex.timebased || logs.length<3) return null;
+  const dones = logs.filter(l=>l.done && l.reps!=null);
+  if(dones.length<3) return null;
+  const rirs = dones.map(l=> l.rir==null?2:l.rir);
+  const allTop = dones.every(l=> l.reps >= parseRepTop(ex.reps));
+  const allRir = rirs.every(r=>r>=1);
+  if(allTop && allRir && ex.reps.includes("–")){
+    return { warn:false, text:"Bạn đã đạt upper rep range ở cả 3 set với RIR ≥ 1. Buổi sau có thể cân nhắc <b>tăng tạ nhẹ</b> và quay lại khoảng 9–10 rep." };
+  }
+  if(rirs.some(r=>r===0) || dones.some(l=> l.reps <= parseRepBottom(ex.reps)-3)){
+    return { warn:true, text:"Có set gắng sức quá mức (RIR 0) hoặc rep giảm mạnh. <b>Giữ mức tạ hiện tại</b> và ưu tiên kỹ thuật." };
+  }
+  return null;
+}
+function parseRepTop(reps){ const nums = String(reps).match(/\d+/g); return nums? +nums[nums.length-1] : 12; }
+function parseRepBottom(reps){ const nums = String(reps).match(/\d+/g); return nums? +nums[0] : 8; }
+
+function renderExerciseStep(){
+  const exId = WOD.exList[WOD.exIdx];
+  const ex = findEx(exId);
+  const total = WOD.sets[exId];
+  const logs = WOD.logs[exId] || [];
+  while(logs.length < total) logs.push({kg:"", reps:"", rir:"", done:false});
+  WOD.logs[exId] = logs;
+  const last = lastTimeFor(exId);
+  const sug = suggestionFor(exId, logs);
+  const doneCount = logs.filter(l=>l.done).length;
+
+  /* copy previous set values */
+  for(let i=1;i<logs.length;i++){
+    if(!logs[i].kg && logs[i-1].kg) logs[i].kg = logs[i-1].kg;
+    if(!logs[i].rir && logs[i-1].rir) logs[i].rir = logs[i-1].rir;
+  }
+
+  const lastHTML = last? '<div class="lasttime"><div class="lt-title">Last time · '+fmtDateVN(last.date)+'</div>'
+    + '<div class="lt-sets">'+last.sets.map(s=>'<span>'+esc(s)+'</span>').join("")+'</div></div>' : '';
+
+  const rows = logs.map((l,i)=>
+    '<div class="setrow'+(l.done?" done":"")+'">'
+    + '<div class="sr-num">'+(i+1)+'</div>'
+    + '<div class="input-wrap"><input class="input" type="number" inputmode="decimal" min="0" step="0.5" placeholder="kg" value="'+l.kg+'" data-action="log-field" data-field="kg" data-idx="'+i+'" aria-label="Set '+(i+1)+' kg"></div>'
+    + '<div class="input-wrap"><input class="input" type="'+(ex.timebased?"number":"number")+'" inputmode="numeric" min="0" '+(ex.timebased?'placeholder="giây"':'placeholder="reps"')+' value="'+l.reps+'" data-action="log-field" data-field="reps" data-idx="'+i+'" aria-label="Set '+(i+1)+' '+(ex.timebased?"giây":"reps")+'"></div>'
+    + '<select class="select" data-action="log-field" data-field="rir" data-idx="'+i+'" aria-label="Set '+(i+1)+' RIR">'
+    + '<option value=""'+(l.rir===""?" selected":"")+'>RIR</option>'
+    + [0,1,2,3,4].map(n=>'<option value="'+n+'"'+(String(l.rir)===String(n)?" selected":"")+'>'+n+(n===4?"+":"")+'</option>').join("")
+    + '</select>'
+    + '<button class="btn-done" data-action="toggle-set" data-idx="'+i+'" aria-label="Hoàn thành set '+(i+1)+'" aria-pressed="'+(!!l.done)+'">'+Icon("check",18)+'</button>'
+    + '</div>').join("");
+
+  $("#wodOverlay").innerHTML = renderWodHeader()
+    + '<div class="wod-body"><div class="wod-body-inner">'
+    + '<div class="wod-ex-head"><div>'
+    + '<div class="eyebrow">Bài '+(WOD.exIdx+1)+' / '+WOD.exList.length+'</div>'
+    + '<div class="wod-ex-title">'+esc(ex.name)+'</div>'
+    + '<div class="wod-ex-meta"><span class="tag">'+total+' × '+esc(ex.reps)+'</span><span class="tag">Nghỉ '+esc(restLabel(ex))+'</span><span class="tag">'+esc(ex.primary.join(" · "))+'</span></div>'
+    + '</div>'
+    + '<button class="btn btn-outline" data-action="open-exercise" data-id="'+exId+'">'+Icon("book",16)+'HƯỚNG DẪN</button></div>'
+    + '<div class="fig-frame">'+figHTML(exId)+'</div>'
+    + '<div class="fig-controls">'
+    + '<button class="btn btn-sm btn-outline" data-action="fig-play" data-id="'+exId+'">'+Icon("play",14)+'Xem chuyển động</button>'
+    + '<button class="btn btn-sm btn-ghost" data-action="open-exercise" data-id="'+exId+'">Kỹ thuật &amp; lỗi sai</button>'
+    + '</div>'
+    + '<div class="cue-box mt14">'+Icon("info",20)+'<div><b>Cue:</b> '+esc(ex.cue)+'</div></div>'
+    + lastHTML
+    + (sug? '<div class="suggest'+(sug.warn?" warn":"")+'">'+Icon(sug.warn?"warn":"target",18)+'<div>'+sug.text+'</div></div>' : '')
+    + '<div class="sr-heads mt14"><span>SET</span><span>KG</span><span>'+(ex.timebased?"SEC":"REPS")+'</span><span>RIR</span><span>DONE</span></div>'
+    + '<div class="setgrid">'+rows+'</div>'
+    + '<div class="row-between mt14"><span class="small muted">'+doneCount+' / '+total+' set hoàn thành</span>'
+    + '<button class="btn btn-sm btn-ghost pain-btn" data-action="pain">'+Icon("warn",15)+'I feel pain</button></div>'
+    + '<div class="row mt20">'
+    + (WOD.exIdx>0? '<button class="btn btn-outline" data-action="prev-exercise">'+Icon("chevronL",16)+'Bài trước</button>':'')
+    + '<button class="btn btn-primary btn-lg" style="flex:1" data-action="next-exercise" '+(doneCount===0?"":"")+'>'+(WOD.exIdx===WOD.exList.length-1? "KẾT THÚC BUỔI TẬP":"BÀI TIẾP THEO")+' '+Icon("chevronR",16)+'</button>'
+    + '</div>'
+    + '</div></div>';
+}
+function restLabel(ex){ return ex.restMax && ex.restMax!==ex.rest ? ex.rest+"–"+ex.restMax+"s" : ex.rest+"s"; }
+
+function toggleSet(idx){
+  const exId = WOD.exList[WOD.exIdx];
+  const logs = WOD.logs[exId];
+  const l = logs[idx];
+  l.done = !l.done;
+  if(l.done){
+    WOD.setsDone = Object.keys(WOD.logs).reduce((a,id)=> a + WOD.logs[id].filter(x=>x.done).length, 0);
+    if(state.settings.restAuto) startRestTimer(exId);
+    if(navigator.vibrate) try{ navigator.vibrate(30); }catch(e){}
+  }
+  renderExerciseStep();
+}
+function restSeconds(exId){
+  const ex = findEx(exId);
+  const wk = currentProgramWeek();
+  let sec = ex.rest;
+  if(ex.restMax && ex.restMax>ex.rest) sec = Math.round((ex.rest+ex.restMax)/2);
+  if(wk<=2) sec = Math.min(sec, 90);
+  return sec || 90;
+}
+/* REST TIMER */
+let REST = null;
+function startRestTimer(exId){
+  const total = restSeconds(exId);
+  REST = { total, left: total, tick:null, exId };
+  renderRest();
+  REST.tick = setInterval(()=>{
+    REST.left--;
+    updateRest();
+    if(REST.left<=0){
+      clearInterval(REST.tick);
+      REST.done = true;
+      finishRestPulse();
+    }
+  },1000);
+}
+function updateRest(){
+  if(!REST) return;
+  const val = $("#restVal"), fg = $("#restFg");
+  if(val) val.textContent = fmtClock(REST.left);
+  if(fg){
+    const C = 2*Math.PI*38;
+    fg.style.strokeDashoffset = String(C*(1 - REST.left/REST.total));
+    fg.style.stroke = REST.done ? "var(--success)" : "var(--primary)";
+  }
+}
+function finishRestPulse(){
+  const card = document.querySelector(".rest-card");
+  if(card) card.classList.add("pulse");
+  const msg = $("#restMsg");
+  if(msg){ msg.textContent = "Sẵn sàng cho set tiếp theo"; msg.classList.add("done"); }
+  if(navigator.vibrate) try{ navigator.vibrate([120,80,120]); }catch(e){}
+}
+function renderRest(){
+  const C = 2*Math.PI*38;
+  $("#restOverlay").innerHTML = '<div class="rest-card">'
+    + '<div class="rest-ring"><svg width="86" height="86" viewBox="0 0 86 86">'
+    + '<circle class="rr-bg" cx="43" cy="43" r="38" fill="none" stroke-width="8"/>'
+    + '<circle id="restFg" class="rr-fg" cx="43" cy="43" r="38" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="0"/></svg>'
+    + '<div class="rr-val" id="restVal">'+fmtClock(REST.left)+'</div></div>'
+    + '<div class="rest-info"><div class="rest-title">Rest</div><div class="rest-msg" id="restMsg">Nghỉ giữa các set — thở sâu, uống nước nhẹ.</div>'
+    + '<div class="rest-btns">'
+    + '<button class="btn btn-sm btn-outline" data-action="rest-add">'+Icon("plus",13)+'15s</button>'
+    + '<button class="btn btn-sm btn-outline" data-action="rest-sub">'+Icon("minus",13)+'15s</button>'
+    + '<button class="btn btn-sm btn-primary" data-action="rest-skip">Skip</button>'
+    + '</div></div></div>';
+  $("#restOverlay").classList.add("open");
+}
+function stopRest(){
+  if(REST && REST.tick) clearInterval(REST.tick);
+  REST = null;
+  $("#restOverlay").classList.remove("open");
+  $("#restOverlay").innerHTML = "";
+}
+function renderSummary(){
+  const logs = [];
+  WOD.exList.forEach(id=>{
+    (WOD.logs[id]||[]).forEach(l=>{ if(l.done) logs.push({ex:id, ...l}); });
+  });
+  const volume = logs.reduce((s,l)=> s + (parseFloat(l.kg)||0)*(parseFloat(l.reps)||0), 0);
+  const mins = Math.max(1, Math.round(WOD.elapsed/60));
+  $("#wodOverlay").innerHTML = '<div class="wod-head">'
+    + '<div style="flex:1"><b>WORKOUT COMPLETE</b></div></div>'
+    + '<div class="wod-body"><div class="wod-body-inner">'
+    + '<div class="sum-big"><div class="checkmark"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path class="ck-path" d="M4.5 12.5 10 18 19.5 6.5"/></svg></div>'
+    + '<h2 style="font-size:24px">Buổi '+WOD.wo+' hoàn thành 🎉</h2>'
+    + '<p class="muted small mt8">'+WORKOUTS[WOD.wo].full+' · '+fmtDateVN(WOD.date)+'</p></div>'
+    + '<div class="sum-stats">'
+    + '<div class="sum-stat"><b>'+fmtClock(WOD.elapsed)+'</b><span>Thời lượng</span></div>'
+    + '<div class="sum-stat"><b>'+WOD.exList.length+'</b><span>Bài tập</span></div>'
+    + '<div class="sum-stat"><b>'+logs.length+'</b><span>Sets</span></div>'
+    + '<div class="sum-stat"><b>'+(volume>0? fmtNum(Math.round(volume)):"—")+'</b><span>Volume (kg)</span></div>'
+    + '</div>'
+    + '<div class="card"><div class="card-title">'+Icon("dumbbell",18)+'Chi tiết</div><div class="mt8">'
+    + WOD.exList.map(id=>{
+        const ls = (WOD.logs[id]||[]).filter(l=>l.done);
+        if(!ls.length) return "";
+        const ex = findEx(id);
+        return '<div class="hist-item"><span>'+esc(ex.name)+'</span><b>'+ls.map(l=> (l.kg? l.kg+"kg":"bw")+"×"+(l.reps||"—")).join(" · ")+'</b></div>';
+      }).join("") + '</div></div>'
+    + '<div class="card mt16"><div class="card-title">'+Icon("heart",18)+'Buổi tập thế nào?</div>'
+    + '<div class="feel-row mt14" id="wodFeel">'
+    + ["Dễ","Vừa","Khó","Rất khó"].map(f=>'<button class="chip" data-action="feel" data-val="'+f+'">'+f+'</button>').join("")
+    + '</div>'
+    + '<label class="field mt14">Ghi chú<textarea class="input" id="wodNotes" placeholder="Ví dụ: Hip thrust cảm giác tốt, RDL nên giảm tạ..."></textarea></label>'
+    + '<button class="btn btn-primary btn-lg btn-block mt14" data-action="save-workout">'+Icon("check",18)+'SAVE WORKOUT</button>'
+    + '</div></div></div>';
+}
+function saveWorkout(){
+  const feel = WOD.feel || "";
+  const notes = ($("#wodNotes")||{value:""}).value.trim();
+  const logs = {};
+  WOD.exList.forEach(id=>{
+    const ls = (WOD.logs[id]||[]).map(l=>({kg: l.kg===""?null:+l.kg, reps: l.reps===""?null:+l.reps, rir: l.rir===""?null:+l.rir, done:!!l.done}));
+    if(ls.some(l=>l.done)) logs[id] = ls;
+  });
+  const rec = {
+    id: WOD.id, wo: WOD.wo, date: WOD.date,
+    duration: WOD.elapsed, exList: WOD.exList, logs,
+    setsDone: Object.values(logs).reduce((a,ls)=>a+ls.filter(l=>l.done).length,0),
+    feel, notes
+  };
+  state.workouts.push(rec);
+  const hb = state.habits[WOD.date]||{}; hb.workout = 1; state.habits[WOD.date] = hb;
+  saveState();
+  exitWorkoutMode();
+  toast("Đã lưu buổi tập ✓","check");
+  render();
+}
+function viewWorkout(id){
+  const w = state.workouts.find(x=>x.id===id); if(!w) return;
+  openModal('<div class="modal-head"><h3>Buổi '+w.wo+' · '+fmtDateVN(w.date)+'</h3><button class="icon-btn" data-action="close-modal">'+Icon("x",18)+'</button></div>'
+    + '<p class="small muted">'+WORKOUTS[w.wo].full+' · '+Math.floor(w.duration/60)+' phút'+(w.feel? ' · '+esc(w.feel):'')+'</p>'
+    + '<div class="mt14">'+w.exList.map(id2=>{
+        const ls=(w.logs[id2]||[]).filter(l=>l.done); if(!ls.length) return "";
+        return '<div class="hist-item"><span>'+esc(findEx(id2).name)+'</span><b>'+ls.map(l=>(l.kg?l.kg+"kg":"bw")+"×"+(l.reps||"—")).join(" · ")+'</b></div>';
+      }).join("")+'</div>'
+    + (w.notes? '<p class="small mt14">📝 '+esc(w.notes)+'</p>':'')
+    + '<div class="modal-actions"><button class="btn btn-outline" data-action="close-modal">Đóng</button></div>');
+}
+
+/* ============================================================
+   EXERCISE LIBRARY + DETAIL
+   ============================================================ */
+let exFilter = { q:"", group:"all" };
+function renderWorkoutLibrary(){
+  const ids = EX_IDS.filter(id=>{
+    const e = findEx(id);
+    if(exFilter.group!=="all" && e.group!==exFilter.group) return false;
+    if(exFilter.q && !(e.name+" "+e.primary.join(" ")).toLowerCase().includes(exFilter.q.toLowerCase())) return false;
+    return true;
+  });
+  return '<div class="section-title">'+Icon("book",20)+'Thư viện bài tập</div>'
+    + '<div class="row wrap">'
+    + '<div class="search-wrap">'+Icon("search",18)+'<input class="input" id="exSearch" placeholder="Tìm bài tập…" value="'+esc(exFilter.q)+'" aria-label="Tìm bài tập"></div>'
+    + '</div>'
+    + '<div class="chips mt8">'
+    + [["all","All"],["lower","Lower Body"],["upper","Upper Body"],["core","Core"]].map(g=>
+        '<button class="chip'+(exFilter.group===g[0]?" active":"")+'" data-action="ex-group" data-group="'+g[0]+'">'+g[1]+'</button>').join("")
+    + '</div>'
+    + (ids.length? '<div class="ex-grid mt14">'+ids.map(id=>{
+        const e = findEx(id);
+        return '<button class="ex-card" data-action="open-exercise" data-id="'+id+'">'
+          + '<div class="ex-thumb">'+figSVG(id,"a")+'</div>'
+          + '<div class="ex-card-body"><div class="ex-name">'+esc(e.name)+'</div>'
+          + '<div class="ex-meta">'+esc(e.primary.join(" · "))+'</div>'
+          + '<div class="ex-meta">'+e.sets+' × '+esc(e.reps)+' · nghỉ '+restLabel(e)+'</div>'
+          + '<div class="ex-tags"><span class="tag">'+EQUIP[e.equip]+'</span><span class="tag">'+DIFF[e.diff]+'</span></div>'
+          + '</div></button>';
+      }).join("")+'</div>'
+      : '<div class="empty mt14"><div class="e-icon">'+Icon("search",22)+'</div><p>Không tìm thấy bài tập nào. Thử từ khóa khác.</p></div>');
+}
+function renderWorkoutHubFull(){ return renderWorkoutHub(); }
+
+function renderExerciseDetail(id){
+  const ex = findEx(id);
+  if(!ex) return viewHeader("Không tìm thấy bài tập","",'') + '<div class="empty"><div class="e-icon">'+Icon("info",22)+'</div><p>Bài tập không tồn tại.</p><button class="btn btn-primary" data-action="nav" data-view="workout">Về trang Tập luyện</button></div>';
+  const woIn = Object.keys(WORKOUTS).filter(k=>WORKOUTS[k].exList.includes(id));
+  const tab = exerciseTab;
+  const body = tab==="overview" ? `
+    <div class="cue-box">${Icon("info",20)}<div><b>Cue:</b> ${esc(ex.cue)}</div></div>
+    <div class="card mt14"><div class="card-title">${Icon("book",18)}Cách thực hiện</div>
+      <ol class="steps-list mt8">${ex.exec.map(s=>'<li>'+esc(s)+'</li>').join("")}</ol></div>
+    ${ex.progression? '<div class="card mt14"><div class="card-title">'+Icon("steps",18)+'Lộ trình tiến triển</div><p class="small mt8">'+ex.progression.join(" → ")+'</p><p class="tiny muted mt8">Bắt đầu mức bạn kiểm soát tốt 8–12 rep, hạ dần độ cao khi mạnh lên.</p></div>' : ''}
+    <div class="card mt14"><div class="card-title">${Icon("info",18)}Thông tin</div>
+      <div class="hist-item"><span>Nhóm cơ chính</span><b>${esc(ex.primary.join(" · "))}</b></div>
+      <div class="hist-item"><span>Prescription</span><b>${ex.sets} × ${esc(ex.reps)}</b></div>
+      <div class="hist-item"><span>Nghỉ</span><b>${restLabel(ex)}</b></div>
+      <div class="hist-item"><span>Dụng cụ</span><b>${EQUIP[ex.equip]}</b></div>
+      <div class="hist-item"><span>Độ khó</span><b>${DIFF[ex.diff]}</b></div>
+      <div class="hist-item"><span>Xuất hiện trong</span><b>${woIn.map(k=>"Buổi "+k).join(", ")}</b></div>
+      ${ex.starters? '<div class="hist-item"><span>Mức tạ gợi ý ban đầu</span><b>'+esc(ex.starters)+'</b></div>':''}
+    </div>
+    <div class="safety-card mt14">${Icon("warn",20)}<div><b>I feel pain?</b> Đau cơ/mỏi cơ khác với đau nhói ở khớp. Nếu đau nhói, tê, chóng mặt hoặc đau tăng dần — <b>dừng bài tập này, không cố hoàn thành set</b>.</div></div>`
+  : tab==="technique" ? `
+    <div class="card"><div class="card-title">${Icon("check",18)}Checklist trước mỗi set</div>
+      <div id="formChecklist">
+      ${["Chân đúng vị trí","Core engaged","Biên độ không gây đau","Tạ kiểm soát được","Rep cuối vẫn giữ form"].map((c,i)=>
+        '<button type="button" class="check-row" style="width:100%;text-align:left;background:none;border:0" data-action="fc-toggle"><span class="habit-box">'+Icon("check",14)+'</span><span>'+c+'</span></button>').join("")}
+      </div>
+      <button class="btn btn-success btn-block mt14" data-action="form-ready" id="formReadyBtn" disabled>Form ready ✓</button>
+      <p class="tiny muted mt8">Tick đủ 5 mục để bật nút — mỗi set nên check lại nhanh.</p></div>
+    <div class="card mt14"><div class="card-title">${Icon("timer",18)}Nhịp thở &amp; nhịp rep</div>
+      <ul class="meal-items mt8"><li>Hít vào khi hạ / chuẩn bị.</li><li>Thở ra khi gắng sức (đẩy, kéo, đứng lên).</li><li>Nhịp gợi ý: 1–2 giây gắng sức, 2–3 giây trả về.</li></ul></div>`
+  : tab==="mistakes" ? `
+    <div class="stack">${ex.mistakes.map(m=>
+      '<div class="mistake-card"><span class="mk-icon">'+Icon("warn",18)+'</span><div><b>✗ '+esc(m[0])+'</b><div class="mk-fix"><b>Fix:</b> '+esc(m[1])+'</div></div></div>').join("")}
+    </div>
+    <div class="glossary mt14">${glossaryHTML()}</div>`
+  : /* sets */ `
+    <div class="card"><div class="card-title">${Icon("dumbbell",18)}Logging nhanh</div>
+      <p class="small muted mt8">Ghi set ngay tại đây (ngoài buổi tập) — dữ liệu vẫn dùng cho gợi ý Last time &amp; overload.</p>
+      <div class="setgrid mt14" id="quickLog">${quickLogRows(id)}</div>
+      <button class="btn btn-primary btn-block mt14" data-action="save-quicklog" data-id="${id}">${Icon("check",16)}Lưu logging</button></div>
+    ${lastTimeFor(id)? '<div class="lasttime mt14"><div class="lt-title">Last time</div><div class="lt-sets">'+lastTimeFor(id).sets.map(s=>'<span>'+esc(s)+'</span>').join("")+'</div></div>':''}`;
+
+  return '<button class="btn btn-ghost" data-action="back" style="margin-bottom:14px">'+Icon("chevronL",16)+'Quay lại</button>'
+    + '<div class="ex-detail">'
+    + '<div><div class="ex-stage"><div class="fig-frame">'+figHTML(id)+'</div>'
+    + '<div class="fig-controls"><button class="btn btn-sm btn-outline" data-action="fig-play" data-id="'+id+'">'+Icon("play",14)+'Xem chuyển động</button>'
+    + '<button class="btn btn-sm btn-ghost" data-action="fig-stop">'+Icon("pause",14)+'Dừng</button></div></div></div>'
+    + '<div><div class="eyebrow">'+ex.group==="lower"?"Lower Body":(ex.group==="upper"?"Upper Body":"Core")+'</div>'
+    + '<h1 style="font-size:26px;margin-top:4px">'+esc(ex.name)+'</h1>'
+    + '<div class="row wrap mt8"><span class="badge b-strength">'+ex.sets+' × '+esc(ex.reps)+'</span><span class="badge b-info">Nghỉ '+restLabel(ex)+'</span><span class="badge b-recovery">'+EQUIP[ex.equip]+'</span></div>'
+    + '<div class="tabs mt16" role="tablist">'
+    + [["overview","OVERVIEW"],["technique","TECHNIQUE"],["mistakes","MISTAKES"],["sets","SETS"]].map(t=>
+        '<button class="tab'+(tab===t[0]?" active":"")+'" role="tab" aria-selected="'+(tab===t[0])+'" data-action="ex-tab" data-tab="'+t[0]+'" data-id="'+id+'">'+t[1]+'</button>').join("")
+    + '</div><div class="tabpanel mt14">'+body+'</div></div>'
+    + '</div>';
+}
+let exerciseTab = "overview";
+function quickLogRows(exId){
+  const ex = findEx(exId);
+  const n = ex.sets;
+  const logs = quickLog[exId] || [];
+  while(logs.length<n) logs.push({kg:"",reps:"",rir:""});
+  quickLog[exId] = logs;
+  return logs.map((l,i)=>
+    '<div class="setrow">'
+    + '<div class="sr-num">'+(i+1)+'</div>'
+    +    '<div class="input-wrap"><input class="input" type="number" inputmode="decimal" placeholder="kg" value="'+l.kg+'" data-ql="kg" data-ql-ex="'+exId+'" data-idx="'+i+'" aria-label="kg set '+(i+1)+'"></div>'
+    + '<div class="input-wrap"><input class="input" type="number" inputmode="numeric" placeholder="'+(ex.timebased?"giây":"reps")+'" value="'+l.reps+'" data-ql="reps" data-ql-ex="'+exId+'" data-idx="'+i+'" aria-label="reps set '+(i+1)+'"></div>'
+    + '<select class="select" data-ql="rir" data-ql-ex="'+exId+'" data-idx="'+i+'" aria-label="RIR set '+(i+1)+'">'
+    + '<option value="">RIR</option>'+[0,1,2,3,4].map(v=>'<option value="'+v+'"'+(String(l.rir)===String(v)?" selected":"")+'>'+v+'</option>').join("")
+    + '</select><div></div></div>').join("");
+}
+let quickLog = {};
+
+/* ============================================================
+   PROGRESS PAGE + CANVAS CHARTS
+   ============================================================ */
+function renderProgress(){
+  const w = latestWeight();
+  const s = stats();
+  const startW = state.profile.startingWeight;
+  const cur = w!=null? w : startW;
+  const change = (cur - startW).toFixed(1);
+  const firstWaist = state.waist.length? state.waist[0].cm : null;
+  const lastWaist = state.waist.length? state.waist[state.waist.length-1].cm : null;
+  const waistChange = (firstWaist!=null && lastWaist!=null)? (lastWaist-firstWaist).toFixed(1) : null;
+  const totalSteps = Object.values(state.steps).reduce((a,b)=>a+b,0);
+
+  const sum = '<div class="grid g4">'
+    + '<div class="card stat-card"><div class="stat-icon">'+Icon("scale")+'</div><div><div class="stat-val">'+(w!=null? w.toFixed(1)+" kg":"—")+'</div><div class="stat-label">Cân hiện tại</div></div></div>'
+    + '<div class="card stat-card"><div class="stat-icon '+(change<=0?"green":"amber")+'">'+Icon("chart")+'</div><div><div class="stat-val">'+(change>0?"+":"")+change+' kg</div><div class="stat-label">So với xuất phát ('+startW+')</div></div></div>'
+    + '<div class="card stat-card"><div class="stat-icon green">'+Icon("note")+'</div><div><div class="stat-val">'+(waistChange!=null? (waistChange>0?"+":"")+waistChange+" cm":"—")+'</div><div class="stat-label">Vòng eo</div></div></div>'
+    + '<div class="card stat-card"><div class="stat-icon">'+Icon("target")+'</div><div><div class="stat-val">'+s.adherence+'%</div><div class="stat-label">Tuân thủ ('+s.totalWorkouts+' buổi)</div></div></div>'
+    + '</div>';
+
+  const adherence = Array.from({length:12},(_,i)=>{
+    const wk=i+1; const r=weekRange(wk);
+    const done = r.start? state.workouts.filter(x=>weekOfDate(x.date)===wk).length : 0;
+    return { wk, done, pct: Math.round(done/3*100) };
+  }).filter(x=> x.done>0 || x.wk<=s.week);
+
+  return viewHeader("Tiến độ","Xu hướng quan trọng hơn một con số duy nhất",'')
+    + sum
+    + '<div class="grid g2 mt20">'
+    + '<div class="card chart-card"><div class="card-title">'+Icon("scale",18)+'Cân nặng theo thời gian</div>'
+    + '<canvas id="chartWeight" height="240" aria-label="Biểu đồ cân nặng"></canvas>'
+    + weightForm() + weightHistoryList() + '</div>'
+    + '<div class="card chart-card"><div class="card-title">'+Icon("note",18)+'Vòng eo (đo 2 tuần/lần)</div>'
+    + '<canvas id="chartWaist" height="240" aria-label="Biểu đồ vòng eo"></canvas>'
+    + waistForm() + waistHistoryList() + '</div>'
+    + '</div>'
+    + '<div class="grid g2 mt16">'
+    + '<div class="card"><div class="card-title">'+Icon("steps",18)+'Bước chân</div>'
+    + stepsForm()
+    + '<canvas id="chartSteps" height="200" class="mt14" aria-label="Biểu đồ bước chân"></canvas>'
+    + '<div class="tiny muted mt8">Tổng: '+fmtNum(totalSteps)+' bước · mục tiêu 8.000–10.000/ngày</div></div>'
+    + '<div class="card"><div class="card-title">'+Icon("target",18)+'Workout adherence</div>'
+    + (adherence.length? adherence.map(a=>
+        '<div class="adh-row"><span class="adh-week">Week '+a.wk+'</span>'
+        + '<div class="adh-bar bar thin"><i style="width:'+a.pct+'%;'+(a.pct<67?'background:var(--warning-amber)':'')+'"></i></div>'
+        + '<span class="adh-val">'+a.done+'/3</span></div>').join("")
+      : '<div class="empty mt8" style="padding:24px"><p>Chưa có buổi tập nào. <b>Buổi tập đầu tiên đang chờ bạn.</b></p><button class="btn btn-primary" data-action="start-workout" data-wo="A">'+Icon("play",15)+'START WORKOUT</button></div>')
+    + '</div></div>'
+    + adjustmentCard()
+    + '<div class="card mt16"><div class="card-title">'+Icon("scale",18)+'Cân 3 lần/tuần — dùng trung bình tuần</div>'
+    + '<p class="small muted mt8">Cân nặng dao động theo nước, muối, giấc ngủ và chu kỳ. App tính <b>trung bình tuần</b> và chỉ đánh giá xu hướng trên trung bình, không dùng một lần cân riêng lẻ.</p>'
+    + weeklyAvgTable() + '</div>';
+}
+function weightForm(){
+  const tk = todayKey();
+  return '<div class="entry-row mt14">'
+    + '<label class="field">Ngày<input class="input" type="date" id="wDate" value="'+tk+'" max="'+tk+'"></label>'
+    + '<label class="field" style="max-width:140px">Cân nặng (kg)<input class="input" type="number" step="0.1" min="30" max="200" id="wKg" placeholder="62.5"></label>'
+    + '<button class="btn btn-primary" data-action="add-weight">'+Icon("plus",16)+'Thêm</button>'
+    + '</div>';
+}
+function waistForm(){
+  const tk = todayKey();
+  return '<div class="entry-row mt14">'
+    + '<label class="field">Ngày<input class="input" type="date" id="waistDate" value="'+tk+'" max="'+tk+'"></label>'
+    + '<label class="field" style="max-width:150px">Eo (cm)<input class="input" type="number" step="0.5" min="40" max="160" id="waistCm" placeholder="74"></label>'
+    + '<button class="btn btn-primary" data-action="add-waist">'+Icon("plus",16)+'Thêm</button>'
+    + '</div>';
+}
+function stepsForm(){
+  const tk = todayKey();
+  return '<div class="entry-row mt14">'
+    + '<label class="field">Ngày<input class="input" type="date" id="stDate" value="'+tk+'" max="'+tk+'"></label>'
+    + '<label class="field" style="max-width:150px">Bước<input class="input" type="number" step="100" min="0" id="stNum" placeholder="8000"></label>'
+    + '<button class="btn btn-primary" data-action="add-steps">'+Icon("plus",16)+'Thêm</button>'
+    + '</div>';
+}
+function weightHistoryList(){
+  if(!state.bodyWeight.length) return '<div class="empty mt14" style="padding:22px"><p><b>Chưa có dữ liệu cân nặng.</b><br>Thêm lần cân đầu tiên để bắt đầu theo dõi xu hướng.</p></div>';
+  return '<div class="hist-list mt14">'+state.bodyWeight.slice().reverse().map((e,i)=>
+    '<div class="hist-item"><span>'+fmtDateVN(e.date)+'</span><span class="row"><b>'+e.kg.toFixed(1)+' kg</b>'
+    + '<button class="hi-x" data-action="del-weight" data-idx="'+(state.bodyWeight.length-1-i)+'" aria-label="Xóa '+fmtDateVN(e.date)+'">'+Icon("trash",14)+'</button></span></div>').join("")+'</div>';
+}
+function waistHistoryList(){
+  if(!state.waist.length) return '<div class="empty mt14" style="padding:22px"><p><b>Chưa có dữ liệu vòng eo.</b><br>Đo 2 tuần/lần, cùng giờ trong ngày.</p></div>';
+  return '<div class="hist-list mt14">'+state.waist.slice().reverse().map((e,i)=>
+    '<div class="hist-item"><span>'+fmtDateVN(e.date)+'</span><span class="row"><b>'+e.cm.toFixed(1)+' cm</b>'
+    + '<button class="hi-x" data-action="del-waist" data-idx="'+(state.waist.length-1-i)+'" aria-label="Xóa '+fmtDateVN(e.date)+'">'+Icon("trash",14)+'</button></span></div>').join("")+'</div>';
+}
+function weeklyAvgTable(){
+  const wk = currentProgramWeek();
+  const rows = [];
+  for(let w=1; w<=wk; w++){
+    const aw = weeklyAvgWeight(w);
+    const r = weekRange(w);
+    if(aw!=null) rows.push({w, avg:aw, n: state.bodyWeight.filter(e=> dateInWeek(w,e.date)).length});
+  }
+  if(!rows.length) return '<p class="small muted mt8">Cân 3 lần/tuần (sáng, sau vệ sinh, trước khi ăn) — trung bình tuần sẽ hiện ở đây.</p>';
+  return '<div class="mt14">'+rows.map(r=>'<div class="hist-item"><span>Week '+r.w+' ('+r.n+' lần cân)</span><b>TB '+r.avg.toFixed(2)+' kg</b></div>').join("")+'</div>';
+}
+
+/* --- Canvas charts --- */
+function cssVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function setupCanvas(cv){
+  const dpr = window.devicePixelRatio||1;
+  const rect = cv.getBoundingClientRect();
+  const w = Math.max(rect.width, 200), h = parseInt(cv.getAttribute("height")||"220",10);
+  cv.width = w*dpr; cv.height = h*dpr;
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return { ctx, w, h };
+}
+function niceBounds(vals){
+  let min = Math.min(...vals), max = Math.max(...vals);
+  if(min===max){ min-=1; max+=1; }
+  const pad = (max-min)*0.15;
+  min -= pad; max += pad;
+  return {min,max};
+}
+function drawLineChart(cvId, entries, valKey, unit, target){
+  const cv = document.getElementById(cvId);
+  if(!cv) return;
+  const {ctx,w,h} = setupCanvas(cv);
+  const padL = 42, padR = 14, padT = 16, padB = 30;
+  const cGrid = cssVar("--border"), cText = cssVar("--text2"), cLine = cssVar("--primary"), cDot = cssVar("--primary");
+  ctx.clearRect(0,0,w,h);
+  if(!entries.length){
+    ctx.fillStyle = cText; ctx.font = "600 13px Inter, sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("Chưa có dữ liệu — thêm mục đầu tiên ở bên dưới.", w/2, h/2);
+    return;
+  }
+  const vals = entries.map(e=>e[valKey]);
+  const {min,max} = niceBounds(vals);
+  const X = i => padL + (entries.length===1? (w-padL-padR)/2 : i*(w-padL-padR)/(entries.length-1));
+  const Y = v => padT + (max-v)*(h-padT-padB)/(max-min);
+  ctx.strokeStyle = cGrid; ctx.lineWidth = 1; ctx.font = "600 10.5px Inter, sans-serif"; ctx.fillStyle = cText;
+  const steps = 4;
+  for(let i=0;i<=steps;i++){
+    const v = min + (max-min)*i/steps, y = Y(v);
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(w-padR,y); ctx.stroke();
+    ctx.textAlign = "right"; ctx.fillText(v.toFixed(1), padL-7, y+3.5);
+  }
+  if(target!=null && target>=min && target<=max){
+    ctx.strokeStyle = cssVar("--success"); ctx.setLineDash([6,5]); ctx.beginPath();
+    ctx.moveTo(padL,Y(target)); ctx.lineTo(w-padR,Y(target)); ctx.stroke(); ctx.setLineDash([]);
+  }
+  const labelEvery = Math.ceil(entries.length/6);
+  ctx.textAlign = "center";
+  entries.forEach((e,i)=>{
+    if(i%labelEvery===0 || i===entries.length-1){
+      ctx.fillText(e.date.slice(5), X(i), h-9);
+    }
+  });
+  /* line */
+  ctx.strokeStyle = cLine; ctx.lineWidth = 2.4; ctx.lineJoin = "round"; ctx.beginPath();
+  entries.forEach((e,i)=>{ const x=X(i), y=Y(e[valKey]); i? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
+  ctx.stroke();
+  /* area */
+  const grad = ctx.createLinearGradient(0,padT,0,h-padB);
+  grad.addColorStop(0, cLine+"33"); grad.addColorStop(1, cLine+"00");
+  ctx.fillStyle = grad; ctx.beginPath();
+  entries.forEach((e,i)=>{ const x=X(i), y=Y(e[valKey]); i? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
+  ctx.lineTo(X(entries.length-1), h-padB); ctx.lineTo(X(0), h-padB); ctx.closePath(); ctx.fill();
+  /* dots */
+  entries.forEach((e,i)=>{
+    ctx.beginPath(); ctx.arc(X(i), Y(e[valKey]), 3.4, 0, Math.PI*2);
+    ctx.fillStyle = cDot; ctx.fill();
+    ctx.strokeStyle = cssVar("--surface"); ctx.lineWidth = 2; ctx.stroke();
+  });
+  ctx.font = "700 11px Inter, sans-serif";
+  const last = entries[entries.length-1];
+  ctx.fillStyle = cLine; ctx.textAlign = "right";
+  ctx.fillText(last[valKey].toFixed(1)+unit, w-padR-2, Y(last[valKey])-9);
+}
+function drawStepsChart(){
+  const cv = document.getElementById("chartSteps");
+  if(!cv) return;
+  const {ctx,w,h} = setupCanvas(cv);
+  const keys = Object.keys(state.steps).sort().slice(-14);
+  ctx.clearRect(0,0,w,h);
+  if(!keys.length){
+    ctx.fillStyle = cssVar("--text2"); ctx.font = "600 13px Inter, sans-serif"; ctx.textAlign="center";
+    ctx.fillText("Chưa có dữ liệu bước chân.", w/2, h/2);
+    return;
+  }
+  const padL=42,padR=10,padT=12,padB=28;
+  const maxV = Math.max(10000, ...keys.map(k=>state.steps[k]))*1.1;
+  const bw = (w-padL-padR)/keys.length;
+  keys.forEach((k,i)=>{
+    const v = state.steps[k];
+    const bh = (v/maxV)*(h-padT-padB);
+    const x = padL + i*bw + bw*0.15, y = h-padB-bh;
+    ctx.fillStyle = v>=8000? cssVar("--success") : cssVar("--primary");
+    ctx.beginPath();
+    const r = Math.min(6, bw*0.3);
+    ctx.roundRect ? (ctx.beginPath(), ctx.roundRect(x,y,bw*0.7,bh,r), ctx.fill())
+                  : ctx.fillRect(x,y,bw*0.7,bh);
+    if(keys.length<=8 || i%2===0){
+      ctx.fillStyle = cssVar("--text2"); ctx.font="600 9.5px Inter,sans-serif"; ctx.textAlign="center";
+      ctx.fillText(k.slice(5), x+bw*0.35, h-9);
+    }
+  });
+  /* target line */
+  ctx.strokeStyle = cssVar("--success"); ctx.setLineDash([6,5]);
+  const ty = h-padB-(8000/maxV)*(h-padT-padB);
+  ctx.beginPath(); ctx.moveTo(padL,ty); ctx.lineTo(w-padR,ty); ctx.stroke(); ctx.setLineDash([]);
+}
+function drawSparkline(){
+  const cv = document.getElementById("sparkCanvas"); if(!cv) return;
+  const entries = state.bodyWeight.slice(-30);
+  drawLineChart("sparkCanvas", entries, "kg", " kg", state.profile.targetWeight);
+}
+function drawAllCharts(){
+  drawLineChart("chartWeight", state.bodyWeight, "kg", " kg", state.profile.targetWeight);
+  drawLineChart("chartWaist", state.waist, "cm", " cm", null);
+  drawStepsChart();
+}
+window.addEventListener("resize", debounce(()=>{
+  if(currentView==="progress") drawAllCharts();
+  if(currentView==="dashboard") drawSparkline();
+},200));
+
+/* --- Adjustment logic --- */
+function adjustmentCard(){
+  const wk = currentProgramWeek();
+  if(wk<3 || !state.profile.startDate){
+    return '<div class="card"><div class="card-title">'+Icon("info",18)+'Điều chỉnh thông minh</div>'
+      + '<p class="small muted mt8">Sau ít nhất 2 tuần có dữ liệu cân &amp; eo, app sẽ gợi ý điều chỉnh calo hoặc bước chân dựa trên xu hướng trung bình tuần.</p></div>';
+  }
+  const a = weeklyAvgWeight(wk), b = weeklyAvgWeight(wk-1);
+  if(b!=null && a!=null){
+    const d = a-b;
+    if(d > 0.7){
+      return '<div class="card" style="border-color:var(--warning-amber)"><div class="card-title" style="color:var(--warning)">'+Icon("warn",18)+'Tiến độ đang khá nhanh</div>'
+        + '<p class="small mt8">Trung bình tuần tăng/giảm '+Math.abs(d).toFixed(2)+' kg — nhanh hơn ~0,7 kg/tuần. '
+        + 'Hãy ưu tiên năng lượng, hiệu suất tập và khả năng hồi phục; cân nhắc ăn thêm chút nếu thấy mất năng lượng.</p></div>';
+    }
+    if(Math.abs(d)<0.15){
+      return '<div class="card"><div class="card-title">'+Icon("target",18)+'Tiến độ đang chậm</div>'
+        + '<p class="small mt8">Cân trung bình gần như không đổi 2 tuần liền. Bạn có thể cân nhắc <b>một trong hai</b> lựa chọn (không cần cả hai):</p>'
+        + '<div class="grid g2 mt14">'
+        + '<div class="note-card">'+Icon("nutrition",18)+'<div><b>Option A:</b> giảm khoảng 100–150 kcal/ngày.</div></div>'
+        + '<div class="note-card">'+Icon("steps",18)+'<div><b>Option B:</b> tăng khoảng 1.500–2.000 bước/ngày.</div></div>'
+        + '</div></div>';
+    }
+    return '<div class="card"><div class="card-title" style="color:var(--success)">'+Icon("check",18)+'Xu hướng ổn</div>'
+      + '<p class="small muted mt8">Trung bình tuần '+(d<0?"giảm ":"")+d.toFixed(2)+' kg — trong vùng 0,25–0,5 kg/tuần. Giữ nguyên nhịp hiện tại!</p></div>';
+  }
+  return '<div class="card"><div class="card-title">'+Icon("info",18)+'Điều chỉnh thông minh</div>'
+    + '<p class="small muted mt8">Cần cân ít nhất 2 tuần liền để app đánh giá xu hướng. Cân 3 lần/tuần vào buổi sáng nhé.</p></div>';
+}
+
+/* ============================================================
+   NUTRITION
+   ============================================================ */
+function renderNutrition(){
+  const tk = todayKey();
+  const meals = state.meals[tk]||[];
+  const targets = [
+    {label:"Calories", val:"1600–1700", unit:"kcal", pct:60, icon:"flame"},
+    {label:"Protein", val:"95–110", unit:"g", pct:65, icon:"egg"},
+    {label:"Nước", val:"2–2.5", unit:"L", pct:60, icon:"water"},
+    {label:"Rau & trái cây", val:"2–3", unit:"bữa chính", pct:70, icon:"veg"}
+  ];
+  const tg = '<div class="grid g4">'+targets.map(t=>
+    '<div class="card"><div class="row-between"><span class="stat-label">'+t.label+'</span>'+Icon(t.icon,17)+'</div>'
+    + '<div class="stat-val mt8">'+t.val+' <span class="tiny muted">'+t.unit+'</span></div>'
+    + '<div class="bar thin mt8"><i style="width:'+t.pct+'%"></i></div></div>').join("")+'</div>';
+
+  const mealsDef = [
+    ["b","Bữa sáng","egg",["40–50g yến mạch","2 quả trứng","1 quả chuối"]],
+    ["l","Bữa trưa","rice",["Cơm vừa phải","~150g ức/đùi gà bỏ da","Nhiều rau"]],
+    ["s","Bữa phụ","nutrition",["Sữa chua không đường","Ổi / táo / chuối"]],
+    ["d","Bữa tối","veg",["Cơm vừa phải","200g đậu hũ","1–2 trứng hoặc thịt/cá","Rau"]]
+  ];
+  const mealCards = '<div class="grid g2 mt16">'+mealsDef.map(m=>{
+    const done = meals.includes(m[0]);
+    return '<div class="meal-card"><div class="meal-head"><div class="m-name"><span class="mi">'+Icon(m[2],17)+'</span>'+m[1]+'</div>'
+      + '<button class="chip'+(done?" active":"")+'" data-action="meal-check" data-meal="'+m[0]+'" aria-pressed="'+done+'">'+(done? Icon("check",14)+" Đã ăn":"Đánh dấu ăn")+'</button></div>'
+      + '<ul class="meal-items">'+m[3].map(i=>"<li>"+i+"</li>").join("")+'</ul></div>';
+  }).join("")+'</div>';
+
+  const foods = '<div class="grid g4 mt16">'
+    + '<div class="card food-col"><h4>'+Icon("egg",17)+'Protein</h4><ul><li>Trứng</li><li>Đậu hũ</li><li>Ức/đùi gà bỏ da</li><li>Cá basa</li><li>Cá nục</li><li>Thịt heo nạc</li><li>Sữa chua</li><li>Sữa không đường</li></ul></div>'
+    + '<div class="card food-col"><h4>'+Icon("rice",17)+'Carb</h4><ul><li>Cơm</li><li>Khoai lang</li><li>Khoai tây</li><li>Yến mạch</li><li>Bánh mì</li><li>Bún</li><li>Bắp</li></ul></div>'
+    + '<div class="card food-col"><h4>'+Icon("veg",17)+'Rau</h4><ul><li>Rau muống</li><li>Bắp cải</li><li>Cải xanh</li><li>Dưa leo</li><li>Cà chua</li></ul></div>'
+    + '<div class="card food-col"><h4>'+Icon("nutrition",17)+'Trái cây</h4><ul><li>Chuối</li><li>Ổi</li><li>Cam</li><li>Táo (tùy ngân sách)</li></ul></div>'
+    + '</div>';
+
+  const budget = state.budget||60000;
+  return viewHeader("Dinh dưỡng","Ăn đủ protein — không cần đắt",'')
+    + tg
+    + '<div class="section-title">'+Icon("nutrition",20)+'Menu mẫu 1 ngày</div>'
+    + '<div class="card"><p class="small muted">Bấm để đánh dấu bữa đã ăn — reset theo ngày, không cần nhập calo phức tạp.</p></div>'
+    + mealCards
+    + '<div class="section-title">'+Icon("book",20)+'“Ăn đủ protein không cần đắt”</div>'
+    + foods
+    + '<div class="note-card mt16">'+Icon("info",18)+'<div>Không cần mua whey, granola, cá hồi, hạt nhập khẩu hay đồ “diet” tốn tiền. Ưu tiên trứng, đậu hũ, gà, cá bình dân, thịt nạc, cơm, khoai, rau theo mùa.</div></div>'
+    + '<div class="section-title">'+Icon("note",20)+'Ngân sách sinh viên</div>'
+    + '<div class="card"><div class="entry-row">'
+    + '<label class="field" style="max-width:220px">Ngân sách ăn/ngày (VND)<input class="input" type="number" id="budgetInput" step="5000" min="0" value="'+budget+'"></label>'
+    + '<button class="btn btn-primary" data-action="save-budget">'+Icon("check",16)+'Lưu</button>'
+    + '<div style="flex:1;min-width:220px" class="grid g3">'
+    + '<div class="sum-stat"><b>'+fmtNum(budget*7)+'</b><span>/ tuần</span></div>'
+    + '<div class="sum-stat"><b>~'+fmtNum(budget*30)+'</b><span>/ tháng</span></div>'
+    + '<div class="sum-stat"><b>1.6–2.2 tr</b><span>tham khảo/tháng</span></div>'
+    + '</div></div>'
+    + '<p class="tiny muted mt8">Tham khảo khoảng 50.000–75.000 VND/ngày nếu chủ yếu tự nấu (1,6–2,2 triệu/tháng tùy khu vực và giá thực tế).</p></div>';
+}
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+function renderSettings(){
+  const p = state.profile;
+  return viewHeader("Cài đặt","Hồ sơ · dữ liệu · giao diện",'')
+    + '<div class="grid g2">'
+    + '<div class="card"><div class="card-title">'+Icon("settings",18)+'Hồ sơ</div>'
+    + '<div class="grid g2 mt14">'
+    + '<label class="field">Tuổi<input class="input" type="number" id="pfAge" value="'+p.age+'" min="14" max="90"></label>'
+    + '<label class="field">Giới tính<select class="select" id="pfSex"><option value="female"'+(p.sex==="female"?" selected":"")+'>Nữ</option><option value="male"'+(p.sex==="male"?" selected":"")+'>Nam</option></select></label>'
+    + '<label class="field">Chiều cao (cm)<input class="input" type="number" id="pfHeight" value="'+p.height+'"></label>'
+    + '<label class="field">Cân xuất phát (kg)<input class="input" type="number" id="pfStart" step="0.1" value="'+p.startingWeight+'"></label>'
+    + '<label class="field">Mục tiêu (kg)<input class="input" type="number" id="pfTarget" step="0.1" value="'+p.targetWeight+'"></label>'
+    + '<label class="field">Ngày bắt đầu<input class="input" type="date" id="pfStart2" value="'+(p.startDate||"")+'"></label>'
+    + '</div>'
+    + '<button class="btn btn-primary mt14" data-action="save-profile">'+Icon("check",16)+'Lưu hồ sơ</button></div>'
+    + '<div class="stack">'
+    + '<div class="card"><div class="card-title">'+Icon("monitor",18)+'Giao diện</div>'
+    + '<div class="set-row"><div class="s-main"><div class="s-title">Chủ đề</div><div class="s-desc">Sáng · Tối · Theo hệ thống</div></div>'
+    + '<div class="seg" role="group" aria-label="Chủ đề">'
+    + [["light","Sáng","sun"],["dark","Tối","moon"],["system","Hệ thống","monitor"]].map(t=>
+        '<button class="'+(state.settings.theme===t[0]?"active":"")+'" data-action="set-theme" data-theme="'+t[0]+'">'+Icon(t[2],14)+t[1]+'</button>').join("")
+    + '</div></div>'
+    + '<div class="set-row"><div class="s-main"><div class="s-title">Rest timer tự chạy</div><div class="s-desc">Tự bật khi hoàn thành một set</div></div>'
+    + '<button class="switch'+(state.settings.restAuto?" on":"")+'" data-action="toggle-restauto" role="switch" aria-checked="'+!!state.settings.restAuto+'" aria-label="Rest timer tự chạy"></button></div>'
+    + '</div>'
+    + '<div class="card"><div class="card-title">'+Icon("download",18)+'Dữ liệu</div>'
+    + '<div class="row wrap mt14">'
+    + '<button class="btn btn-outline" data-action="export">'+Icon("download",16)+'EXPORT DATA</button>'
+    + '<button class="btn btn-outline" data-action="import">'+Icon("upload",16)+'IMPORT DATA</button>'
+    + '<button class="btn btn-danger" data-action="reset">'+Icon("trash",16)+'RESET DATA</button>'
+    + '<input type="file" id="importFile" accept="application/json,.json" style="display:none">'
+    + '</div></div>'
+    + '</div></div>'
+    + '<div class="card mt16"><div class="card-title">'+Icon("info",18)+'Về ứng dụng</div>'
+    + '<p class="small muted mt8">Ứng dụng cung cấp hướng dẫn tập luyện chung cho người trưởng thành khỏe mạnh và <b>không thay thế tư vấn y tế</b>. '
+    + 'Nếu có chấn thương, bệnh nền, đang mang thai, đau khớp kéo dài hoặc chóng mặt bất thường — hãy tham khảo bác sĩ hoặc chuyên gia phù hợp trước khi tăng cường độ. Không tự chẩn đoán.</p>'
+    + '<p class="tiny muted mt8">Dữ liệu chỉ lưu trên thiết bị của bạn (localStorage) · F12 Coaching v'+APP_VERSION+' · Theo giáo trình “Giảm mỡ — Giữ cơ — Săn chắc 12 tuần”.</p></div>';
+}
+
+/* weekly review modal */
+function openWeeklyReview(week){
+  window.__revFeel = "";
+  const r = weekRange(week);
+  const workouts = state.workouts.filter(x=>weekOfDate(x.date)===week).length;
+  const steps = weeklyAvgSteps(week);
+  const wavg = weeklyAvgWeight(week);
+  const days = r.start? Array.from({length:7},(_,i)=>todayKey(new Date(parseISO(r.start).getTime()+i*86400000))) : [];
+  const proteinDays = days.filter(k=>state.habits[k]&&state.habits[k].protein).length;
+  const waterDays = days.filter(k=>state.habits[k]&&state.habits[k].water).length;
+  openModal('<div class="modal-head"><h3>WEEK '+week+' REVIEW</h3><button class="icon-btn" data-action="close-modal">'+Icon("x",18)+'</button></div>'
+    + '<div class="grid g2">'
+    + '<div class="sum-stat"><b>'+workouts+'/3</b><span>Workouts</span></div>'
+    + '<div class="sum-stat"><b>'+(steps!=null?fmtNum(Math.round(steps)):"—")+'</b><span>Bước TB/ngày</span></div>'
+    + '<div class="sum-stat"><b>'+(wavg!=null?wavg.toFixed(1)+" kg":"—")+'</b><span>Cân TB</span></div>'
+    + '<div class="sum-stat"><b>'+waterDays+'/7</b><span>Ngày đủ nước</span></div>'
+    + '</div>'
+    + '<div class="mt14"><div class="card-title" style="font-size:14px">'+Icon("heart",16)+'Tuần này thế nào?</div>'
+    + '<div class="feel-row mt8" id="revFeel">'+["Rất khó","Khó","Tốt","Dễ"].map(f=>'<button class="chip" data-action="rev-feel" data-val="'+f+'">'+f+'</button>').join("")+'</div></div>'
+    + '<label class="field mt14">Ghi chú tuần<textarea class="input" id="revNotes" placeholder="Điều nào tốt? Điều nào muốn cải thiện tuần sau?"></textarea></label>'
+    + '<div class="modal-actions"><button class="btn btn-outline" data-action="close-modal">Để sau</button>'
+    + '<button class="btn btn-primary" data-action="complete-week" data-week="'+week+'">'+Icon("check",16)+'COMPLETE WEEK</button></div>');
+}
+function completeWeek(week){
+  const feel = (window.__revFeel||"");
+  const notes = ($("#revNotes")||{value:""}).value.trim();
+  state.reviews[week] = { feel, notes, completed:true, at: todayKey() };
+  if(week>=state.program.currentWeek && week<12) state.program.currentWeek = week+1;
+  saveState();
+  closeModal();
+  toast("Hoàn thành Week "+week+" ✓","check");
+  render();
+}
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+let onbStep = 1;
+function showOnboarding(){
+  onbStep = 1;
+  renderOnboard();
+  $("#onboardRoot").classList.add("open");
+}
+function renderOnboard(){
+  const p = state.profile;
+  let body = "";
+  if(onbStep===1){
+    body = '<div style="text-align:center">'
+      + '<div class="brand-mark" style="margin:0 auto 16px;width:56px;height:56px;border-radius:18px">'+Icon("dumbbell",26)+'</div>'
+      + '<h2 style="font-size:22px">Chào mừng đến với chương trình 12 tuần</h2>'
+      + '<p class="muted small mt8">Giảm mỡ · Giữ cơ · Săn chắc — 3 buổi sức mạnh/tuần + đi bộ, ăn uống đơn giản kiểu sinh viên.</p>'
+      + '<div class="onb-goal">'
+      + '<div class="og">'+Icon("flame",20)+'Giảm mỡ</div>'
+      + '<div class="og">'+Icon("dumbbell",20)+'Giữ cơ</div>'
+      + '<div class="og">'+Icon("heart",20)+'Săn chắc</div></div></div>'
+      + '<div class="modal-actions"><button class="btn btn-outline" data-action="onb-skip">Bỏ qua, dùng mặc định</button>'
+      + '<button class="btn btn-primary" data-action="onb-next">Tiếp tục '+Icon("chevronR",16)+'</button></div>';
+  } else if(onbStep===2){
+    body = '<h2 style="font-size:20px">Hồ sơ của bạn</h2>'
+      + '<p class="muted small mt8">Số liệu mặc định theo giáo trình (nữ · 22 · 166 cm · 63 kg). Bạn có thể sửa.</p>'
+      + '<div class="grid g2 mt14">'
+      + '<label class="field">Tuổi<input class="input" type="number" id="obAge" value="'+p.age+'"></label>'
+      + '<label class="field">Chiều cao (cm)<input class="input" type="number" id="obHeight" value="'+p.height+'"></label>'
+      + '<label class="field">Cân nặng (kg)<input class="input" type="number" id="obWeight" step="0.1" value="'+p.startingWeight+'"></label>'
+      + '<label class="field">Mục tiêu (kg)<input class="input" type="number" id="obTarget" step="0.1" value="'+p.targetWeight+'"></label>'
+      + '</div>'
+      + '<div class="modal-actions"><button class="btn btn-ghost" data-action="onb-prev">'+Icon("chevronL",16)+'Quay lại</button>'
+      + '<button class="btn btn-primary" data-action="onb-next">Tiếp tục '+Icon("chevronR",16)+'</button></div>';
+  } else {
+    const d = new Date();
+    const iso = p.startDate || todayKey(d);
+    body = '<h2 style="font-size:20px">Ngày bắt đầu</h2>'
+      + '<p class="muted small mt8">Chọn ngày bắt đầu 12 tuần (thường là thứ Hai tuần này).</p>'
+      + '<label class="field mt14">Ngày bắt đầu<input class="input" type="date" id="obStart" value="'+iso+'"></label>'
+      + '<div class="glossary mt14"><b>Gợi ý:</b> lịch chuẩn là T2 (Buổi A) · T4 (Buổi B) · T6 (Buổi C), cardio T3/T7, nghỉ T5 &amp; CN.</div>'
+      + '<div class="modal-actions"><button class="btn btn-ghost" data-action="onb-prev">'+Icon("chevronL",16)+'Quay lại</button>'
+      + '<button class="btn btn-primary" data-action="onb-finish">'+Icon("play",16)+'BẮT ĐẦU 12 TUẦN</button></div>';
+  }
+  $("#onboardRoot").innerHTML = '<div class="onb-card">'
+    + '<div class="onb-steps" aria-hidden="true">'+[1,2,3].map(i=>'<span class="onb-step-dot'+(i<=onbStep?" on":"")+'"></span>').join("")+'</div>'
+    + body + '</div>';
+}
+function finishOnboarding(skip){
+  if(skip){
+    state.profile.startDate = state.profile.startDate || todayKey();
+  } else {
+    const g = id => (document.getElementById(id)||{}).value;
+    state.profile.age = +g("obAge")||22;
+    state.profile.height = +g("obHeight")||166;
+    state.profile.startingWeight = +g("obWeight")||63;
+    state.profile.targetWeight = +g("obTarget")||59;
+    state.profile.startDate = g("obStart") || todayKey();
+  }
+  state.onboarded = true;
+  saveState();
+  $("#onboardRoot").classList.remove("open");
+  toast("Chúc bạn 12 tuần thật tốt! ✨","heart");
+  render();
+}
+
+/* ============================================================
+   MODALS: export/import/reset
+   ============================================================ */
+function exportData(){
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "f12-backup-"+todayKey()+".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast("Đã xuất dữ liệu ✓","download");
+}
+function confirmReset(){
+  openModal('<div class="modal-head"><h3>Bạn chắc chắn muốn xóa toàn bộ dữ liệu?</h3></div>'
+    + '<p class="small muted">Toàn bộ buổi tập, cân nặng, eo, bước chân và cài đặt sẽ bị xóa vĩnh viễn khỏi thiết bị này. Hãy EXPORT trước nếu muốn giữ bản sao.</p>'
+    + '<div class="modal-actions"><button class="btn btn-outline" data-action="close-modal">Cancel</button>'
+    + '<button class="btn btn-danger-solid" data-action="reset-confirm">'+Icon("trash",16)+'Delete</button></div>');
+}
+function doReset(){
+  localStorage.removeItem(LS_KEY);
+  state = DEFAULT_STATE();
+  saveState();
+  closeModal();
+  applyTheme();
+  render();
+  showOnboarding();
+  toast("Đã xóa toàn bộ dữ liệu","trash");
+}
+function importData(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(typeof data!=="object" || data===null || !("profile" in data)) throw new Error("bad");
+      state = Object.assign(DEFAULT_STATE(), data);
+      saveState();
+      applyTheme(); render();
+      toast("Đã nhập dữ liệu ✓","upload");
+    }catch(e){ toast("File không hợp lệ","warn"); }
+  };
+  reader.readAsText(file);
+}
+
+/* ============================================================
+   EVENT DELEGATION
+   ============================================================ */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-action]");
+  if(!t) return;
+  const a = t.dataset.action;
+  switch(a){
+    case "nav": navTo(t.dataset.view); break;
+    case "back": if(history.length>1) history.back(); else navTo("workout"); break;
+    case "close-modal": closeModal(); break;
+    case "nutrition-open": closeModal(); exitWorkoutMode(); navTo("nutrition"); break;
+    case "day-detail": openDayDetail(t.dataset.date); break;
+    case "week-detail": openWeekDetail(+t.dataset.week); break;
+    case "open-review": openWeeklyReview(+t.dataset.week); break;
+    case "rev-feel": window.__revFeel = t.dataset.val;
+      $$("#revFeel .chip").forEach(c=>c.classList.remove("active")); t.classList.add("active"); break;
+    case "complete-week": completeWeek(+t.dataset.week); break;
+    case "start-workout": startWorkout(t.dataset.wo, t.dataset.date); break;
+    case "start-scheduled": {
+      const dISO = t.dataset.date, sch = scheduleFor(dISO);
+      if(sch.type==="strength") startWorkout(sch.wo, dISO);
+      else if(sch.type==="rest") toast("Hôm nay là ngày nghỉ — đi bộ nhẹ nếu muốn 🚶","zzz");
+      else { closeModal(); navTo("workout"); toast("Mở tab Cardio để ghi buổi đi bộ","walk"); }
+      break;
+    }
+    case "nav-cardio": closeModal(); exitWorkoutMode(); cardioState={running:false,elapsed:0,type:"walking",tick:null}; openCardio(); break;
+    case "cardio-type": cardioState.type = t.dataset.type;
+      $$("#cardioTypes .chip").forEach(c=>c.classList.remove("active")); t.classList.add("active"); break;
+    case "cardio-toggle": cardioToggle(); break;
+    case "cardio-save": cardioSave(); break;
+    case "save-steps": {
+      const v = parseInt(($("#quickSteps")||{}).value||"0",10);
+      if(v>0){ state.steps[todayKey()] = v; saveState(); toast("Đã lưu "+fmtNum(v)+" bước ✓","check"); render(); }
+      break;
+    }
+    case "warmup-done": WOD.step = "exercise"; renderExerciseStep(); break;
+    case "save-workout": saveWorkout(); break;
+    case "pause-workout": if(WOD){ WOD.paused = !WOD.paused; t.innerHTML = Icon(WOD.paused?"play":"pause",18); } break;
+    case "confirm-exit": confirmExit(); break;
+    case "exit-confirmed": savePartialAndExit(); exitWorkoutMode(); break;
+    case "exit-discard": closeModal(); exitWorkoutMode(); toast("Đã thoát buổi tập","info"); break;
+    case "prev-exercise": if(WOD.exIdx>0){ WOD.exIdx--; renderExerciseStep(); } break;
+    case "next-exercise": {
+      if(WOD.exIdx < WOD.exList.length-1){ WOD.exIdx++; renderExerciseStep(); }
+      else { WOD.step="summary"; renderSummary(); }
+      break;
+    }
+    case "toggle-set": toggleSet(+t.dataset.idx); break;
+    case "fig-play": { const el = document.querySelector('.fig-anim[data-fig="'+t.dataset.id+'"]')||t.closest(".fig-frame").querySelector(".fig-anim");
+      const on = toggleFigAnim(el); t.innerHTML = Icon(on?"pause":"play",14)+(on?"Đang chạy":"Xem chuyển động"); break; }
+    case "fig-stop": stopAllFigs(); break;
+    case "open-exercise": if(WOD){ openExerciseModal(t.dataset.id); } else { exerciseTab="overview"; closeModal(); navTo("exercise", {id:t.dataset.id}); } break;
+    case "exit-workout": exitCardio(); break;
+    case "skip-exercise": { closeModal(); if(WOD){ if(WOD.exIdx < WOD.exList.length-1){ WOD.exIdx++; renderExerciseStep(); } else { WOD.step="summary"; renderSummary(); } } break; }
+    case "ex-tab": exerciseTab = t.dataset.tab; render(); break;
+    case "ex-group": exFilter.group = t.dataset.group; render(); break;
+    case "fc-toggle": {
+      const box = t.querySelector(".habit-box");
+      t.classList.toggle("on");
+      if(box) box.classList.toggle("on", t.classList.contains("on"));
+      const all = document.querySelectorAll("#formChecklist .check-row.on");
+      const btn = document.getElementById("formReadyBtn");
+      if(btn) btn.disabled = all.length < 5;
+      break;
+    }
+    case "form-ready": toast("Form sẵn sàng — vào set thôi! 💪","check"); break;
+    case "pain": openPainModal(); break;
+    case "save-quicklog": saveQuickLog(t.dataset.id); break;
+    case "habit": toggleHabit(t.dataset.key, t); break;
+    case "add-weight": addWeightEntry(); break;
+    case "del-weight": state.bodyWeight.splice(+t.dataset.idx,1); saveState(); render(); toast("Đã xóa mục cân","trash"); break;
+    case "add-waist": addWaistEntry(); break;
+    case "del-waist": state.waist.splice(+t.dataset.idx,1); saveState(); render(); toast("Đã xóa mục eo","trash"); break;
+    case "add-steps": {
+      const d = ($("#stDate")||{}).value||todayKey();
+      const v = parseInt(($("#stNum")||{}).value||"0",10);
+      if(v>0){ state.steps[d]=v; saveState(); render(); toast("Đã lưu bước chân ✓","check"); }
+      break;
+    }
+    case "meal-check": toggleMeal(t.dataset.meal); break;
+    case "save-budget": { const v = parseInt(($("#budgetInput")||{}).value||"60000",10); state.budget=v; saveState(); render(); toast("Đã lưu ngân sách ✓","check"); break; }
+    case "save-profile": saveProfile(); break;
+    case "set-theme": state.settings.theme = t.dataset.theme; saveState(); applyTheme(); render(); break;
+    case "toggle-restauto": state.settings.restAuto = !state.settings.restAuto; saveState(); render(); break;
+    case "export": exportData(); break;
+    case "import": $("#importFile").click(); break;
+    case "reset": confirmReset(); break;
+    case "reset-confirm": doReset(); break;
+    case "onb-next": onbStep++; renderOnboard(); break;
+    case "onb-prev": onbStep--; renderOnboard(); break;
+    case "onb-skip": finishOnboarding(true); break;
+    case "onb-finish": finishOnboarding(false); break;
+    case "view-workout": viewWorkout(t.dataset.id); break;
+    case "rest-add": if(REST){ REST.left+=15; REST.total=Math.max(REST.total,REST.left); updateRest(); } break;
+    case "rest-sub": if(REST){ REST.left=Math.max(0,REST.left-15); updateRest(); } break;
+    case "rest-skip": stopRest(); break;
+  }
+});
+function confirmExit(){
+  openModal('<div class="modal-head"><h3>Thoát buổi tập?</h3></div>'
+    + '<p class="small muted">Buổi tập chưa lưu. Bạn có thể lưu những gì đã xong, hoặc bỏ buổi này.</p>'
+    + '<div class="modal-actions">'
+    + '<button class="btn btn-ghost" data-action="close-modal">Tiếp tục tập</button>'
+    + '<button class="btn btn-outline" data-action="exit-discard">Bỏ buổi này</button>'
+    + '<button class="btn btn-primary" data-action="exit-confirmed">Lưu &amp; thoát</button></div>');
+}
+function savePartialAndExit(){
+  const any = WOD && Object.values(WOD.logs).some(ls=>ls.some(l=>l.done));
+  if(any){ saveWorkout(); }
+  else { toast("Đã thoát — chưa có set nào để lưu","info"); }
+}
+function openExerciseModal(id){
+  const ex = findEx(id); if(!ex) return;
+  openModal('<div class="modal-head"><h3>'+esc(ex.name)+'</h3><button class="icon-btn" data-action="close-modal" aria-label="Đóng">'+Icon("x",18)+'</button></div>'
+    + '<div class="fig-frame">'+figHTML(id)+'</div>'
+    + '<div class="fig-controls"><button class="btn btn-sm btn-outline" data-action="fig-play" data-id="'+id+'">'+Icon("play",14)+'Xem chuyển động</button></div>'
+    + '<div class="cue-box mt14">'+Icon("info",20)+'<div><b>Cue:</b> '+esc(ex.cue)+'</div></div>'
+    + '<ol class="steps-list mt14">'+ex.exec.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>'
+    + '<div class="section-title" style="font-size:14px">Lỗi thường gặp</div>'
+    + ex.mistakes.map(m=>'<div class="mistake-card mb8"><span class="mk-icon">'+Icon("warn",18)+'</span><div><b>✗ '+esc(m[0])+'</b><div class="mk-fix"><b>Fix:</b> '+esc(m[1])+'</div></div></div>').join("")
+    + '<div class="modal-actions"><button class="btn btn-outline" data-action="close-modal">Đóng</button></div>');
+}
+function openPainModal(){
+  openModal('<div class="modal-head"><h3>Bạn đang thấy đau?</h3><button class="icon-btn" data-action="close-modal">'+Icon("x",18)+'</button></div>'
+    + '<div class="safety-card">'+Icon("warn",20)+'<div><b>Đau cơ/mỏi cơ khác với đau nhói ở khớp.</b><br><br>'
+    + 'Nếu có: đau nhói · tê · chóng mặt · đau tăng dần —<br><b>Dừng bài tập này. Không cố hoàn thành set.</b></div></div>'
+    + '<p class="small muted mt14">Có thể: nghỉ lâu hơn, giảm tạ, giảm biên độ, hoặc chuyển sang bài khác không đau. '
+    + 'Đau kéo dài &gt; 48h hoặc đau khớp lặp lại — hãy tham khảo chuyên gia. Ứng dụng không đưa chẩn đoán bệnh.</p>'
+    + '<div class="modal-actions"><button class="btn btn-outline" data-action="close-modal">Đã hiểu</button>'
+    + '<button class="btn btn-danger" data-action="skip-exercise">Bỏ qua bài này</button></div>');
+}
+function toggleHabit(key, el){
+  const tk = todayKey();
+  const h = state.habits[tk]||{};
+  if(h[key]) delete h[key]; else h[key] = 1;
+  state.habits[tk] = h;
+  saveState();
+  el.classList.toggle("on", !!h[key]);
+  el.setAttribute("aria-checked", String(!!h[key]));
+}
+function toggleMeal(meal){
+  const tk = todayKey();
+  const m = state.meals[tk]||[];
+  const i = m.indexOf(meal);
+  if(i>=0) m.splice(i,1); else m.push(meal);
+  state.meals[tk] = m;
+  saveState(); render();
+}
+function addWeightEntry(){
+  const d = ($("#wDate")||{}).value || todayKey();
+  const kg = parseFloat(($("#wKg")||{}).value||"");
+  if(!kg || kg<30 || kg>200){ toast("Nhập cân nặng hợp lệ (30–200 kg)","warn"); return; }
+  state.bodyWeight = state.bodyWeight.filter(e=>e.date!==d);
+  state.bodyWeight.push({date:d, kg});
+  state.bodyWeight.sort((a,b)=>a.date<b.date?-1:1);
+  saveState(); render(); toast("Đã lưu cân nặng ✓","check");
+}
+function addWaistEntry(){
+  const d = ($("#waistDate")||{}).value || todayKey();
+  const cm = parseFloat(($("#waistCm")||{}).value||"");
+  if(!cm || cm<40 || cm>160){ toast("Nhập số đo hợp lệ (40–160 cm)","warn"); return; }
+  state.waist = state.waist.filter(e=>e.date!==d);
+  state.waist.push({date:d, cm});
+  state.waist.sort((a,b)=>a.date<b.date?-1:1);
+  saveState(); render(); toast("Đã lưu vòng eo ✓","check");
+}
+function saveProfile(){
+  const g = id => (document.getElementById(id)||{}).value;
+  state.profile.age = +g("pfAge")||state.profile.age;
+  state.profile.sex = g("pfSex")||"female";
+  state.profile.height = +g("pfHeight")||state.profile.height;
+  state.profile.startingWeight = +g("pfStart")||state.profile.startingWeight;
+  state.profile.targetWeight = +g("pfTarget")||state.profile.targetWeight;
+  state.profile.startDate = g("pfStart2")||state.profile.startDate;
+  saveState(); render(); toast("Đã lưu hồ sơ ✓","check");
+}
+function saveQuickLog(exId){
+  const rows = quickLog[exId]||[];
+  const rec = {
+    id:"w"+Date.now(), wo:"Q", date:todayKey(),
+    duration:0, exList:[exId],
+    logs:{ [exId]: rows.map(l=>({kg:l.kg===""?null:+l.kg, reps:l.reps===""?null:+l.reps, rir:l.rir===""?null:+l.rir, done: !!(l.reps||l.kg)})) },
+    setsDone: rows.filter(l=>l.reps||l.kg).length, feel:"", notes:"Logging nhanh"
+  };
+  state.workouts.push(rec);
+  saveState();
+  quickLog[exId] = null;
+  render();
+  toast("Đã lưu logging ✓","check");
+}
+/* keyboard: habits space/enter */
+document.addEventListener("keydown", e => {
+  if((e.key===" "||e.key==="Enter") && e.target.classList && e.target.classList.contains("habit-row")){
+    e.preventDefault(); e.target.click();
+  }
+  if(e.key==="Escape"){
+    if($("#modalRoot").classList.contains("open")) closeModal();
+    else if(REST) stopRest();
+  }
+});
+/* delegated input events (workout logging + search) */
+function bindLogField(t){
+  if(t.dataset && t.dataset.action==="log-field" && WOD){
+    const exId = WOD.exList[WOD.exIdx];
+    const l = WOD.logs[exId] && WOD.logs[exId][+t.dataset.idx];
+    if(l){ l[t.dataset.field] = t.value; }
+    return true;
+  }
+  if(t.dataset && t.dataset.ql){
+    const exId = t.dataset.qlEx;
+    if(exId && quickLog[exId] && quickLog[exId][+t.dataset.idx]){
+      quickLog[exId][+t.dataset.idx][t.dataset.ql] = t.value;
+    }
+    return true;
+  }
+  return false;
+}
+document.addEventListener("input", e => {
+  const t = e.target;
+  if(t.id==="exSearch"){ exFilter.q = t.value; const pos=t.selectionStart; render(); const n=$("#exSearch"); if(n){n.focus(); n.setSelectionRange(pos,pos);} return; }
+  bindLogField(t);
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if(bindLogField(t)) return;
+  if(t.id==="importFile" && t.files && t.files[0]){ importData(t.files[0]); t.value=""; }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.addEventListener("hashchange", render);
+function init(){
+  loadState();
+  applyTheme();
+  if(!state.profile.startDate) state.profile.startDate = "";
+  currentProgramWeek();
+  if(location.hash==="" ) history.replaceState(null,"","#dashboard");
+  render();
+  if(!state.onboarded) showOnboarding();
+}
+init();
+</script>
+</body>
+</html>
