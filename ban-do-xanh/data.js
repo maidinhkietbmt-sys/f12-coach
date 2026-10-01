@@ -77,6 +77,24 @@ const UserReports = (() => {
       list.push(report);
       return save(list) ? report : null;
     },
+    /* Gộp dữ liệu từ file backup: bỏ qua id trùng, báo lỗi thiếu trường */
+    importMerge(arr) {
+      if (!Array.isArray(arr)) return { added: 0, skipped: 0, invalid: 0 };
+      const list = load();
+      const known = new Set(list.map(r => r.id));
+      let added = 0, skipped = 0, invalid = 0;
+      for (const raw of arr) {
+        const r = normalizeReport({ ...raw, source: 'user' }, 'user');
+        if (!r) { invalid++; continue; }
+        if (known.has(r.id)) { skipped++; continue; }
+        r.mine = true; // dữ liệu nhập là của cộng đồng/người dùng
+        list.push(r);
+        known.add(r.id);
+        added++;
+      }
+      return save(list) ? { added, skipped, invalid } : null;
+    },
+    count() { return load().length; },
     clear() { try { localStorage.removeItem(KEY); } catch {} },
   };
 })();
@@ -159,7 +177,31 @@ const CommunityStore = (() => {
         map.set(id, { comments: v.comments.length, confirms: v.confirms });
       }
       return map;
-  },
+    },
+    exportAll() { return load(); },
+    importMerge(db) {
+      if (!db || typeof db !== 'object' || Array.isArray(db)) return false;
+      const cur = load();
+      for (const [id, v] of Object.entries(db)) {
+        if (!v || typeof v !== 'object') continue;
+        const base = cur[id] || { comments: [], confirms: 0, confirmedByMe: false };
+        const comments = Array.isArray(v.comments) ? v.comments : [];
+        // Gộp bình luận theo id, giữ bản mới nhất nếu trùng
+        const byId = new Map(base.comments.map(c => [c.id, c]));
+        for (const c of comments) {
+          if (!c || !c.id || typeof c.text !== 'string') continue;
+          const prev = byId.get(c.id);
+          if (!prev || (Number(c.ts) || 0) >= (Number(prev.ts) || 0)) byId.set(c.id, c);
+        }
+        cur[id] = {
+          comments: [...byId.values()],
+          confirms: Math.max(0, Number(v.confirms) || 0),
+          confirmedByMe: Boolean(v.confirmedByMe) || base.confirmedByMe,
+        };
+      }
+      return save(cur);
+    },
+    clearAll() { try { localStorage.removeItem(KEY); } catch {} },
   };
 })();
 
@@ -194,3 +236,47 @@ const DataBus = (() => {
     sensorCount() { return cache.sensor.length; },
   };
 })();
+
+/* ---------- Backup: xuất / nhập toàn bộ dữ liệu dạng JSON ---------- */
+const Backup = {
+  /* Gói dữ liệu chuẩn để backup & chia sẻ (không kèm dữ liệu cảm biến demo) */
+  async exportPackage() {
+    return {
+      app: 'ban-do-xanh',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      reports: await UserReports.fetchAll(),
+      community: CommunityStore.exportAll(),
+    };
+  },
+  async download() {
+    const json = JSON.stringify(await Backup.exportPackage(), null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    a.href = url;
+    a.download = `ban-do-xanh-backup-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  },
+  /* Nhập tệp JSON: gộp reports + community, trả về thống kê hoặc throw Error */
+  async importFile(file) {
+    const text = await file.text();
+    let data;
+    try { data = JSON.parse(text); }
+    catch { throw new Error('Tệp không phải JSON hợp lệ.'); }
+    const pkg = data && data.app === 'ban-do-xanh' ? data
+      : (Array.isArray(data) ? { reports: data } : null);
+    if (!pkg || !Array.isArray(pkg.reports) || !pkg.reports.length) {
+      throw new Error('Không tìm thấy báo cáo nào trong tệp.');
+    }
+    const res = UserReports.importMerge(pkg.reports);
+    if (!res) throw new Error('Lưu thất bại — bộ nhớ trình duyệt đầy.');
+    let commOk = true;
+    if (pkg.community) commOk = CommunityStore.importMerge(pkg.community);
+    DataBus.loadAll();
+    return { ...res, community: commOk };
+  },
+};

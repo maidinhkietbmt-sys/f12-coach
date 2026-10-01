@@ -20,10 +20,12 @@ npx serve ban-do-xanh
 - 🚦 **Chấm màu theo mức độ khẩn cấp**: 🔴 Khẩn cấp · 🟠 Nghiêm trọng · 🟡 Cảnh báo · 🟢 Ổn định
 - 🖼️ **Thẻ ảnh nhỏ hiện ngay cạnh chấm** khi nhấn (popover tự lật theo mép bản đồ) — không dùng bảng cố định dưới màn hình
 - 💬 **Trang chi tiết + cộng đồng** — bình luận thảo luận và **xác nhận** báo cáo (lưu localStorage, sẵn sàng nối API)
+- 📊 **Thống kê theo khu vực** — tổng quan, phân bố loại & mức độ, xu hướng 7 ngày, top khu vực (gom cụm ~800m, bấm để bay đến trên bản đồ)
+- 💾 **Xuất / nhập JSON** — backup toàn bộ báo cáo + tương tác; chia sẻ nhanh qua Web Share API (tải về nếu thiết bị không hỗ trợ)
 - 📷 **Nút camera lớn ở giữa dưới**: tự lấy GPS → chọn loại ô nhiễm, mức độ, mô tả, ảnh → gửi (ảnh nén còn ~900px/JPEG 72%)
 - 🔍 **Thanh tìm kiếm** + **bộ lọc** theo loại, mức độ, nguồn dữ liệu
 - 📡 Tách rõ **dữ liệu người dùng** (localStorage) và **dữ liệu cảm biến** (fetch, có demo offline)
-- 🧭 Nút định vị, chú thích màu gọn, phím tắt (A · L · F · H · T · / · Esc)
+- 🧭 Nút định vị, chú thích màu gọn, phím tắt (A · L · F · H · S · T · / · Esc)
 - ♿ Hỗ trợ chuột, cảm ứng, bàn phím: marker focus được, aria-pressed/role=radio, live region, focus restore
 
 ## Kiến trúc (tách tầng)
@@ -32,7 +34,7 @@ npx serve ban-do-xanh
 |---|---|
 | `index.html` | Khung giao diện |
 | `styles.css` | Design system + layout + dark mode |
-| `data.js` | **Tầng dữ liệu**: `UserReports` (localStorage) · `SensorApi` (fetch) · `CommunityStore` (bình luận/xác nhận) · `DataBus` hợp nhất |
+| `data.js` | **Tầng dữ liệu**: `UserReports` · `SensorApi` · `CommunityStore` · `Backup` (xuất/nhập JSON) · `DataBus` hợp nhất |
 | `app.js` | Logic UI: bản đồ, marker, popover, bộ lọc, form, định vị |
 
 ### Mở rộng

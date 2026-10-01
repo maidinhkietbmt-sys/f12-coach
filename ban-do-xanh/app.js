@@ -37,6 +37,12 @@ const el = {
   dtDesc: $('#dtDesc'), confirmBtn: $('#confirmBtn'), confirmCount: $('#confirmCount'),
   commentList: $('#commentList'), commentsHeader: $('#commentsHeader'),
   commentForm: $('#commentForm'), commentInput: $('#commentInput'),
+  statsBtn: $('#statsBtn'), statsOverlay: $('#statsOverlay'), statsClose: $('#statsClose'),
+  statsSummary: $('#statsSummary'), statsByType: $('#statsByType'), statsByLevel: $('#statsByLevel'),
+  statsTrend: $('#statsTrend'), statsTopAreas: $('#statsTopAreas'),
+  kebabBtn: $('#kebabBtn'), kebabMenu: $('#kebabMenu'),
+  mnuStats: $('#mnuStats'), mnuExport: $('#mnuExport'), mnuShare: $('#mnuShare'),
+  mnuImport: $('#mnuImport'), mnuWipe: $('#mnuWipe'), importInput: $('#importInput'),
 };
 
 /* ================== TRẠNG THÁI ================== */
@@ -700,6 +706,235 @@ async function submitReport(e) {
   setTimeout(() => openCard(report.id, { focus: false }), 450);
 }
 
+/* ================== THỐNG KÊ THEO KHU VỰC ================== */
+function haversine(a, b) {
+  const R = 6371, toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+/* Gom cụm đơn giản theo bán kính ~800m; cụm ≥2 báo cáo mới算 khu vực */
+function topAreas(reports, k = 5) {
+  const RADIUS_KM = 0.8;
+  const clusters = [];
+  for (const r of reports) {
+    let best = null, bestD = Infinity;
+  for (const c of clusters) {
+      const d = haversine({ lat: c.lat, lng: c.lng }, { lat: r.lat, lng: r.lng });
+      if (d < bestD) { bestD = d; best = c; }
+    }
+    if (best && bestD <= RADIUS_KM) {
+      best.items.push(r);
+      best.lat = (best.lat * (best.items.length - 1) + r.lat) / best.items.length;
+      best.lng = (best.lng * (best.items.length - 1) + r.lng) / best.items.length;
+    } else {
+      clusters.push({ lat: r.lat, lng: r.lng, items: [r] });
+    }
+  }
+  return clusters
+    .map(c => {
+      // Tên đại diện: báo cáo mới nhất trong cụm
+      const latest = [...c.items].sort((a, b) => b.ts - a.ts)[0];
+      const worst = c.items.reduce((a, b) => LEVELS[b.levelId].rank > LEVELS[a.levelId].rank ? b : a);
+      return {
+        count: c.items.length,
+        lat: c.lat, lng: c.lng,
+        name: latest.title,
+        worstLevel: worst.levelId,
+      };
+    })
+    .filter(c => c.count >= 2)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, k);
+}
+
+function renderStats() {
+  const rs = state.reports;
+  const critical = rs.filter(r => r.levelId === 'critical').length;
+  const userCount = rs.filter(r => r.source === 'user').length;
+  const sensorCount = rs.filter(r => r.source === 'sensor').length;
+  const totalConfirms = rs.reduce((s, r) => s + CommunityStore.get(r.id).confirms, 0);
+
+  el.statsSummary.innerHTML = [
+    ['Tổng báo cáo', rs.length],
+    ['Khẩn cấp', critical],
+    ['Người dùng', userCount],
+    ['Cảm biến', sensorCount],
+    ['Xác nhận', totalConfirms],
+  ].map(([label, n]) => `<div class="stat-card"><b>${n}</b><span>${label}</span></div>`).join('');
+
+  const barRow = (label, n, color, emoji = '') => `
+    <div class="bar-row">
+      <span class="lbl">${emoji} ${escapeHtml(label)}</span>
+      <span class="track"><span class="fill" style="background:${color};width:${rs.length ? Math.max(6, n / rs.length * 100) : 0}%"></span></span>
+      <span class="n">${n}</span>
+    </div>`;
+
+  // Phân bố theo loại
+  const byType = POLLUTION_TYPES
+    .map(t => ({ ...t, n: rs.filter(r => r.typeId === t.id).length }))
+    .sort((a, b) => b.n - a.n);
+  el.statsByType.innerHTML = byType.map(t => barRow(t.label, t.n, 'var(--primary)', t.icon)).join('');
+
+  // Phân bố theo mức độ
+  el.statsByLevel.innerHTML = LEVEL_IDS
+    .map(id => ({ id, n: rs.filter(r => r.levelId === id).length }))
+    .map(x => barRow(LEVELS[x.id].label, x.n, LEVELS[x.id].color)).join('');
+
+  // Xu hướng 7 ngày (bao gồm hôm nay)
+  const days = 7, dayMs = 86400e3;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const buckets = Array.from({ length: days }, (_, i) => {
+    const start = today.getTime() - (days - 1 - i) * dayMs;
+    return { start, end: start + dayMs, n: 0 };
+  });
+  for (const r of rs) {
+    const b = buckets.find(b => r.ts >= b.start && r.ts < b.end);
+    if (b) b.n++;
+  }
+  const maxN = Math.max(1, ...buckets.map(b => b.n));
+  el.statsTrend.innerHTML = buckets.map((b, i) => {
+    const d = new Date(b.start);
+    const dayLabel = i === days - 1 ? 'Nay' : ['T2','T3','T4','T5','T6','T7','CN'][(d.getDay() + 6) % 7];
+    return `<div class="col"><span class="stick" style="height:${Math.round(b.n / maxN * 100)}%"></span><span class="day">${dayLabel}</span></div>`;
+  }).join('');
+
+  // Top khu vực (gom cụm ~800m)
+  const areas = topAreas(rs);
+  el.statsTopAreas.innerHTML = areas.length
+    ? areas.map(a => `
+      <li data-lat="${a.lat.toFixed(5)}" data-lng="${a.lng.toFixed(5)}">
+        <span class="area-name">${escapeHtml(a.name)}</span>
+        <span class="lv-dot" style="background:${LEVELS[a.worstLevel].color}"></span>
+        <span class="n">${a.count} báo cáo</span>
+      </li>`).join('')
+    : '<li style="cursor:default;color:var(--text2);font-size:13px">Chưa đủ dữ liệu gom khu vực (cần ≥2 báo cáo gần nhau).</li>';
+
+  el.statsTopAreas.querySelectorAll('li[data-lat]').forEach(li => {
+    li.addEventListener('click', () => {
+      closeStats();
+      state.map.setView([parseFloat(li.dataset.lat), parseFloat(li.dataset.lng)], 16, { animate: true });
+    });
+  });
+}
+
+function openStats() {
+  renderStats();
+  state.lastFocus = document.activeElement;
+  el.statsOverlay.hidden = false;
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => el.statsClose.focus(), 60);
+}
+
+function closeStats() {
+  if (el.statsOverlay.hidden) return;
+  el.statsOverlay.hidden = true;
+  document.body.style.overflow = '';
+  if (state.lastFocus && document.contains(state.lastFocus)) {
+    state.lastFocus.focus();
+    state.lastFocus = null;
+  }
+}
+
+/* ================== BACKUP / SHARE / IMPORT / WIPE ================== */
+function closeKebab() {
+  if (el.kebabMenu.hidden) return;
+  el.kebabMenu.hidden = true;
+  el.kebabBtn.setAttribute('aria-expanded', 'false');
+}
+
+function openKebab() {
+  el.kebabMenu.hidden = false;
+  el.kebabBtn.setAttribute('aria-expanded', 'true');
+  const first = el.kebabMenu.querySelector('button');
+  if (first) first.focus();
+}
+
+function wireKebab() {
+  el.kebabBtn.addEventListener('click', () => {
+    el.kebabMenu.hidden ? openKebab() : closeKebab();
+  });
+  // Đóng khi bấm ngoài
+  document.addEventListener('pointerdown', (e) => {
+    if (!el.kebabMenu.hidden && !e.target.closest('#kebabMenu, #kebabBtn')) closeKebab();
+  });
+
+  el.mnuStats.addEventListener('click', () => { closeKebab(); openStats(); });
+  el.statsBtn.addEventListener('click', openStats);
+  el.statsClose.addEventListener('click', closeStats);
+  el.statsOverlay.addEventListener('pointerdown', (e) => {
+    if (e.target === el.statsOverlay) closeStats();
+  });
+
+  el.mnuExport.addEventListener('click', async () => {
+    closeKebab();
+    const n = UserReports.count();
+    if (!n) return toast('Chưa có báo cáo nào để xuất.', true);
+    await Backup.download();
+    toast(`⬇️ Đã xuất ${n} báo cáo ra tệp JSON`);
+  });
+
+  el.mnuShare.addEventListener('click', async () => {
+    closeKebab();
+    const n = UserReports.count();
+    if (!n) return toast('Chưa có báo cáo nào để chia sẻ.', true);
+    const json = JSON.stringify(await Backup.exportPackage());
+    const file = new File([json], 'ban-do-xanh-chia-se.json', { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Bản đồ Xanh — dữ liệu báo cáo' });
+        return;
+      } catch { /* người dùng hủy share */ }
+    }
+    await Backup.download();
+    toast('Thiết bị không hỗ trợ chia sẻ tệp — đã tải về thay thế.');
+  });
+
+  el.mnuImport.addEventListener('click', () => {
+    closeKebab();
+    el.importInput.click();
+  });
+
+  el.importInput.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      const res = await Backup.importFile(file);
+      let msg = `📥 Đã nhập ${res.added} báo cáo mới`;
+      if (res.skipped) msg += `, bỏ qua ${res.skipped} trùng`; 
+      if (res.invalid) msg += `, ${res.invalid} dòng lỗi`;
+      toast(msg);
+      announce(msg);
+    } catch (err) {
+      toast(err.message || 'Nhập tệp thất bại.', true);
+    }
+    e.target.value = '';
+  });
+
+  el.mnuWipe.addEventListener('click', () => {
+    closeKebab();
+    const n = UserReports.count();
+    if (!n) return toast('Không có dữ liệu đã lưu để xóa.');
+    // Xác nhận 2 bước ngay trên nút để tránh xóa nhầm
+    if (el.mnuWipe.dataset.armed !== '1') {
+      el.mnuWipe.dataset.armed = '1';
+      el.mnuWipe.textContent = '⚠️ Bấm lần nữa để xác nhận xóa';
+      setTimeout(() => {
+        el.mnuWipe.dataset.armed = '';
+        el.mnuWipe.textContent = '🗑️ Xóa dữ liệu đã lưu';
+      }, 4000);
+      return;
+  }
+    el.mnuWipe.dataset.armed = '';
+    el.mnuWipe.textContent = '🗑️ Xóa dữ liệu đã lưu';
+    UserReports.clear();
+    CommunityStore.clearAll();
+    DataBus.loadAll();
+    toast('Đã xóa toàn bộ báo cáo & tương tác đã lưu.');
+  });
+}
+
 /* ================== THEME ================== */
 function applyTheme(theme) {
   state.theme = theme;
@@ -781,7 +1016,9 @@ function bindKeyboard() {
     const inField = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '');
     if (e.key === 'Escape') {
       if (!el.overlay.hidden) closeSheet();
+      else if (!el.statsOverlay.hidden) closeStats();
       else if (!el.detailOverlay.hidden) closeDetail();
+      else if (!el.kebabMenu.hidden) closeKebab();
       else if (!el.card.hidden) closeCard();
       else if (!el.filterPanel.hidden) { el.filterPanel.hidden = true; el.filterToggleBtn.setAttribute('aria-expanded', 'false'); }
       else if (inField) document.activeElement.blur();
@@ -791,6 +1028,7 @@ function bindKeyboard() {
     if (e.key === 'l' || e.key === 'L') { e.preventDefault(); getMyLocation().catch(() => {}); }
     if (e.key === 'f' || e.key === 'F') { e.preventDefault(); el.filterToggleBtn.click(); }
     if (e.key === 'h' || e.key === 'H') { e.preventDefault(); el.heatToggleBtn.click(); }
+    if (e.key === 's' || e.key === 'S') { e.preventDefault(); openStats(); }
     if (e.key === 't' || e.key === 'T') { e.preventDefault(); el.themeBtn.click(); }
     if (e.key === '/') { e.preventDefault(); el.searchInput.focus(); }
   });
@@ -829,6 +1067,7 @@ async function start() {
   buildChips();
   buildFormOptions();
   bindGlobalEvents();
+  wireKebab();
   bindKeyboard();
 
   DataBus.onReload((reports) => {
